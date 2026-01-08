@@ -2,96 +2,27 @@
 
   <div id="app">
 
-    <div class="headerBox"
-        v-if="$route.path === '/' ||
-        $route.path === '/edititem' ||
-        $route.path === '/storyitem' ||
-        $route.path === '/user'"
-    >写作之语</div>
+    <div class="headerBox" v-if=isMatchRoute>写作之语</div>
 
-    <div class="AllBox">
+    <div class="AllBox" :class="{ 'HomeBox': isMatchRoute }">
       <router-view/>
     </div>
 
     <!--    底部栏-->
-    <TabBox
-        v-if="$route.path === '/' ||
-        $route.path === '/edititem' ||
-        $route.path === '/storyitem' ||
-        $route.path === '/user'"
-    ></TabBox>
+    <TabBox v-if=isMatchRoute></TabBox>
 
   </div>
 
 </template>
 
 <script>
-import Cookies from "js-cookie";
-import myaxios from "@/config/myaxios";
-import {Dialog} from "vant";
-
 export default {
   name: "app",
-  data() {
-    return {
-      token: "",
-      user_id: "",
+  computed: {
+    isMatchRoute() {
+      const matchPaths = ['/', '/edititem', '/storyitem', '/user'];
+      return matchPaths.includes(this.$route.path);
     }
-  },
-  watch: {
-    $route() {
-      this.getIdToken()
-    }
-  },
-
-  methods: {
-    getIdToken() {
-      const id = Cookies.get('user_id');
-      this.user_id = id ? id : '';
-      const token = Cookies.get('token');
-      this.token = token ? token : '';
-
-      if (this.token && this.user_id) {
-        // 测试Token有没有过期
-        this.testToken()
-      }
-    },
-    // 测试token有没有过期
-    testToken() {
-      if (this.token) {
-        myaxios.get("/hello?token=" + this.token).then(res => {
-          if (res.data.message !== "Hello, world!") {
-            Dialog.alert({
-              message: '登录失效，请重新登录！',
-            })
-                .then(() => {
-                  this.outLogin()
-                }).catch(() => {
-              this.outLogin()
-            })
-          }
-        }).catch(() => {
-          Dialog.alert({
-            message: '登录失效，请重新登录！',
-          })
-              .then(() => {
-                this.outLogin()
-              }).catch(() => {
-            this.outLogin()
-          })
-        })
-      }
-    },
-    // 退出登录
-    outLogin() {
-      Cookies.remove('token')
-      Cookies.remove('user_id')
-      this.user_id = ""
-      this.token = ""
-      if (this.$route.path !== '/login') {
-        this.$router.push("/login");
-      }
-    },
   }
 };
 
@@ -105,6 +36,7 @@ export default {
   flex-direction: column;
   height: 100vh;
 }
+
 .headerBox {
   width: 100%;
   height: 50px;
@@ -114,9 +46,14 @@ export default {
   font-size: 20px;
   border-bottom: 1px solid #e5e5e5;
 }
+
 .AllBox {
   flex: 1;
   overflow: auto;
+}
+
+.HomeBox {
+  padding-bottom: 75px;
 }
 
 @font-face {

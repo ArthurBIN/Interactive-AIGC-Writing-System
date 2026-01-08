@@ -72,7 +72,12 @@ export default {
   z-index: 10;
   display: flex;
   border-top: 1px solid #e5e5e5;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  background-color: #fff;
 }
+
 .TabItem {
   flex: 1;
   display: flex;
@@ -81,15 +86,17 @@ export default {
   justify-content: center;
   color: #c0c0c0;
 }
+
 .TabIcon {
   font-size: 30px;
 }
+
 .TabIconText {
   font-size: 14px;
   margin-top: 3px;
 }
 
-*{
+* {
   margin: 0;
   padding: 0;
 }
