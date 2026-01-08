@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 
 import ChatPage from '../views/ChatPage.vue'
 import IndexPage from "@/views/IndexPage.vue";
-import ContentInfoPage from "@/views/ContentInfoPage.vue";
 import LoginPage from "@/views/LoginPage.vue";
 import EditPage from "@/views/EditPage.vue";
 import EditStoryPage from "@/views/EditStoryPage.vue";
@@ -32,12 +31,6 @@ const routes = [
         path: '/chat',
         name: 'chat',
         component: ChatPage,
-        meta: {requiresAuth: true}
-    },
-    {
-        path: '/contentinfo',
-        name: 'contentinfo',
-        component: ContentInfoPage,
         meta: {requiresAuth: true}
     },
     {
