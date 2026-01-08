@@ -58,7 +58,6 @@
           class="PrintButton"
           @click="goToPrint"
       >
-        <i class="iconfont icon-image"></i>
         <span>生成精美图片 / 打印</span>
       </van-button>
     </div>
@@ -158,7 +157,6 @@ export default {
 <style scoped>
 .All {
   width: 100%;
-  background-color: #f8f9fa;
   padding-bottom: 80px;
 }
 

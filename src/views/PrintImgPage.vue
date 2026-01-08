@@ -21,9 +21,7 @@
             <div class="CardDivider"></div>
           </div>
 
-          <div class="CardBody">
-            {{ essay.content }}
-          </div>
+          <div class="CardBody">{{ essay.content }}</div>
 
           <div class="CardFooter">
             <div class="BrandLogo">
@@ -79,6 +77,7 @@
 
     <div class="BottomAction">
       <van-button
+          type="default"
           block
           round
           class="ExportBtn"
@@ -418,8 +417,8 @@ export default {
 }
 
 .ExportBtn {
-  background: #75A47F !important;
-  border: none !important;
-  font-weight: 600;
+  border: 1.5px solid #333 !important;
+  font-weight: 600 !important;
+  color: #333 !important;
 }
 </style>
