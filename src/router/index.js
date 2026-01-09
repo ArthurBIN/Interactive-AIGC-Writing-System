@@ -10,11 +10,12 @@ import PrintImgPage from "@/views/PrintImgPage.vue";
 import EditItemPage from "@/views/EditItemPage.vue";
 import StoryItemPage from "@/views/StoryItemPage.vue";
 import UserPage from "@/views/UserPage.vue";
+import UploadPage from "@/views/UploadPage.vue";
 import {supabase} from "@/config/supabase";
+import CompositionsPage from "@/views/CompositionsPage.vue";
 
 Vue.use(VueRouter)
 
-// 2. 在需要保护的路由上添加 meta: { requiresAuth: true }
 const routes = [
     {
         path: '/login',
@@ -26,7 +27,6 @@ const routes = [
         name: 'index',
         component: IndexPage,
     },
-    // 假设以下页面都需要登录后才能访问
     {
         path: '/chat',
         name: 'chat',
@@ -61,6 +61,18 @@ const routes = [
         path: '/storyitem',
         name: 'storyitem',
         component: StoryItemPage,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/upload',
+        name: 'upload',
+        component: UploadPage,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/compositions',
+        name: 'compositions',
+        component: CompositionsPage,
         meta: {requiresAuth: true}
     },
     {

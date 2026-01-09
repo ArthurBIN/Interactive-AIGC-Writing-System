@@ -32,9 +32,7 @@
             <div class="AssistantAvatar">
               <i class="iconfont icon-aislogo"></i>
             </div>
-            <div class="AssistantContent">
-              {{ item.content }}
-            </div>
+            <div class="AssistantContent" v-html="render(item.content)"></div>
           </div>
         </div>
       </div>
@@ -65,9 +63,10 @@
 </template>
 
 <script>
-import { Toast } from "vant";
-import { createChat, updateChatMessages, getChatDetail } from "@/api/chat";
+import {Toast} from "vant";
+import {createChat, getChatDetail, updateChatMessages} from "@/api/chat";
 import {supabase} from "@/config/supabase";
+import {marked} from 'marked';
 
 export default {
   name: 'ChatPage',
@@ -105,8 +104,11 @@ export default {
   },
 
   methods: {
+    render(text) {
+      return marked.parse(text);
+    },
     async initPage() {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {data: {session}} = await supabase.auth.getSession();
       if (!session) return this.$router.push('/login');
       this.userId = session.user.id;
 
@@ -137,7 +139,7 @@ export default {
       const message = this.inputText.trim();
       if (!message || this.isGenerating) return;
 
-      this.messageList.push({ role: "user", content: message });
+      this.messageList.push({role: "user", content: message});
       this.inputText = "";
       this.isGenerating = true;
 
@@ -160,12 +162,15 @@ export default {
 
     async callMoonshotAPI() {
       const apiKey = process.env.VUE_APP_MOONSHOT_API_KEY;
-      const systemPrompt = { role: "system", content: `你是一个中学生作文导师。当前主题：${this.style}。请引导学生思考，不要代写全篇。` };
+      const systemPrompt = {
+        role: "system",
+        content: `你是一个中学生作文导师。当前主题：${this.style}。请引导学生思考，不要代写全篇。`
+      };
 
       try {
         const response = await fetch("https://api.moonshot.cn/v1/chat/completions", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+          headers: {"Content-Type": "application/json", "Authorization": `Bearer ${apiKey}`},
           body: JSON.stringify({
             model: "moonshot-v1-8k",
             messages: [systemPrompt, ...this.messageList],
@@ -173,7 +178,7 @@ export default {
           })
         });
 
-        const assistantMessage = { role: "assistant", content: "" };
+        const assistantMessage = {role: "assistant", content: ""};
         this.messageList.push(assistantMessage);
 
         const reader = response.body.getReader();
@@ -181,7 +186,7 @@ export default {
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
-          const { done, value } = await reader.read();
+          const {done, value} = await reader.read();
           if (done) break;
 
           const chunk = decoder.decode(value);
@@ -195,7 +200,8 @@ export default {
                 const delta = data.choices[0].delta.content;
                 if (delta) assistantMessage.content += delta;
                 // eslint-disable-next-line no-empty
-              } catch (e) {}
+              } catch (e) {
+              }
             }
           }
           this.scrollToBottom();
@@ -434,7 +440,7 @@ export default {
   line-height: 1.7;
   color: #1f2937;
   word-wrap: break-word;
-  white-space: pre-wrap;
+  white-space: normal;
   padding-top: 4px;
 }
 

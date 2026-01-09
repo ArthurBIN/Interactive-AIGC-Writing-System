@@ -1,7 +1,6 @@
 <template>
   <div class="All">
     <div class="Header">
-      <div class="HeaderTitle">作文灵感助手</div>
       <div class="HeaderSubtitle">选择一个主题，开启你的写作之旅</div>
     </div>
 
@@ -34,7 +33,6 @@ export default {
   name: "IndexPage",
   data() {
     return {
-      // 2. 替换为中学生作文主题
       topicList: [
         {
           intro: "写一写那个对你影响最深的人，刻画他/她的外貌特征、性格闪光点及感人瞬间。",
@@ -82,7 +80,6 @@ export default {
 
   methods: {
     async goToChat(topicName) {
-      // 3. 异步获取 Supabase 会话状态来判断是否登录
       const data = await getCurrentUser();
 
       if (data) {
@@ -98,7 +95,7 @@ export default {
             .catch(() => {
             });
       }
-    }
+    },
   }
 }
 </script>
@@ -111,15 +108,8 @@ export default {
 
 .Header {
   width: 100%;
-  padding: 40px 0 30px;
+  padding: 30px 0;
   text-align: center;
-}
-
-.HeaderTitle {
-  font-size: 24px;
-  font-weight: 700;
-  color: #111;
-  margin-bottom: 8px;
 }
 
 .HeaderSubtitle {
