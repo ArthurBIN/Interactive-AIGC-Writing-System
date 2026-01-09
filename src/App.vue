@@ -42,7 +42,6 @@ export default {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  height: 100vh;
 }
 
 .headerBox {
@@ -58,11 +57,6 @@ export default {
   left: 0;
   z-index: 100;
   background-color: #fff;
-}
-
-.AllBox {
-  flex: 1;
-  overflow: auto;
 }
 
 .HomeBox {

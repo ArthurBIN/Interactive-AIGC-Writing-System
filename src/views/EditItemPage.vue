@@ -161,7 +161,7 @@ export default {
   padding: 16px;
   box-sizing: border-box;
   position: sticky;
-  top: 0;
+  top: 50px;
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   z-index: 10;
