@@ -92,7 +92,6 @@ export default {
   background-color: #fff;
   border-top: 1px solid #f0f0f0;
   z-index: 100;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .TabItem {

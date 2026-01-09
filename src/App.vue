@@ -53,6 +53,11 @@ export default {
   font-weight: 700;
   font-size: 20px;
   border-bottom: 1px solid #e5e5e5;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  background-color: #fff;
 }
 
 .AllBox {
@@ -61,6 +66,7 @@ export default {
 }
 
 .HomeBox {
-  padding-bottom: 75px;
+  padding-top: 50px;
+  padding-bottom: 65px;
 }
 </style>
