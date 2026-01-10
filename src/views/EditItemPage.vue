@@ -216,7 +216,7 @@ export default {
 .RecordCard {
   width: 100%;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
