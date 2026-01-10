@@ -11,8 +11,9 @@ import EditItemPage from "@/views/EditItemPage.vue";
 import StoryItemPage from "@/views/StoryItemPage.vue";
 import UserPage from "@/views/UserPage.vue";
 import UploadPage from "@/views/UploadPage.vue";
-import {supabase} from "@/config/supabase";
 import CompositionsPage from "@/views/CompositionsPage.vue";
+import AnalysisPage from "@/views/AnalysisPage.vue";
+import {supabase} from "@/config/supabase";
 
 Vue.use(VueRouter)
 
@@ -73,6 +74,12 @@ const routes = [
         path: '/compositions',
         name: 'compositions',
         component: CompositionsPage,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/analysis/:id?',
+        name: 'analysis',
+        component: AnalysisPage,
         meta: {requiresAuth: true}
     },
     {

@@ -17,16 +17,30 @@
       </div>
     </div>
 
-    <van-dialog v-model="showTextDialog" title="输入作文内容" show-cancel-button @confirm="handleTextSubmit">
+    <van-dialog
+        v-model="showTextDialog"
+        title="填写作文"
+        show-cancel-button
+        :before-close="onBeforeCloseText"
+    >
       <div class="dialog-content">
+        <van-field
+            v-model="compositionTitle"
+            label="标题"
+            placeholder="请输入作文标题 (可选)"
+            maxlength="50"
+            clearable
+            class="title-input"
+        />
         <van-field
             v-model="textContent"
             type="textarea"
             placeholder="请粘贴或输入作文内容..."
             maxlength="5000"
-            rows="10"
+            rows="8"
             show-word-limit
             @input="cleanTextStyle"
+            class="content-input"
         />
       </div>
     </van-dialog>
@@ -48,6 +62,11 @@
 
 <script>
 import {Toast} from 'vant';
+import mammoth from 'mammoth';
+
+const pdfjsLib = require('pdfjs-dist/legacy/build/pdf.js');
+// 设置 Worker 路径 (使用静态资源库的 CDN)
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
 export default {
   name: 'UploadPage',
@@ -55,26 +74,45 @@ export default {
     return {
       showTextDialog: false,
       showFileDialog: false,
-      textContent: '',
+      compositionTitle: '', // 作文标题
+      textContent: '',      // 作文内容
       fileList: []
     }
   },
   methods: {
     // 文本清洗：去除样式转为纯文本
     cleanTextStyle() {
-      // 简单处理：如果是从富文本粘贴，可以过滤掉 HTML 标签
       this.textContent = this.textContent.replace(/<[^>]+>/g, "");
     },
 
-    // 提交文本逻辑
-    handleTextSubmit() {
-      if (!this.textContent.trim()) {
-        Toast.fail('内容不能为空');
-        return;
+    // 对话框关闭前校验
+    onBeforeCloseText(action, done) {
+      if (action === 'confirm') {
+        if (!this.textContent.trim()) {
+          Toast.fail('内容不能为空');
+          done(false);
+        } else {
+          const compositionData = {
+            title: this.compositionTitle || '无标题',
+            content: this.textContent,
+          };
+          localStorage.setItem('temp_composition_data', JSON.stringify(compositionData));
+          this.$router.push('/analysis');
+          Toast.success('提交成功，开始分析');
+          this.resetData();
+          done();
+        }
+      } else {
+        // 点击取消按钮
+        this.resetData();
+        done();
       }
-      console.log('提交的纯文本内容：', this.textContent);
-      Toast.success('上传成功');
+    },
+
+    // 重置输入数据
+    resetData() {
       this.textContent = '';
+      this.compositionTitle = '';
     },
 
     // 文件上传前的校验
@@ -91,22 +129,75 @@ export default {
       return true;
     },
 
-    // 文件读取后的操作
-    afterReadFile(file) {
-      console.log('已获取文件对象：', file.file);
-      Toast.success('文件读取成功');
-      this.showFileDialog = false;
-      // 这里可以执行后续上传接口逻辑
+    // 解析文件逻辑
+    async afterReadFile(file) {
+      const originFile = file.file;
+      const fileName = originFile.name;
+
+      Toast.loading({message: '正在解析...', forbidClick: true, duration: 0});
+
+      try {
+        let extractedText = "";
+        if (fileName.toLowerCase().endsWith('.docx')) {
+          extractedText = await this.parseDocx(originFile);
+        } else if (fileName.toLowerCase().endsWith('.pdf')) {
+          extractedText = await this.parsePdf(originFile);
+        } else {
+          Toast.fail('格式不支持');
+          return;
+        }
+
+        // 1. 设置内容
+        this.textContent = this.cleanExtractedText(extractedText);
+
+        // 2. 提取文件名作为标题（去掉后缀名）
+        this.compositionTitle = fileName.substring(0, fileName.lastIndexOf('.'));
+
+        Toast.clear();
+        this.showFileDialog = false;
+        // 3. 解析完成后自动打开文本编辑框，方便用户查看和修改标题/内容
+        this.showTextDialog = true;
+        Toast.success('解析成功');
+      } catch (error) {
+        console.error('解析失败:', error);
+        Toast.fail('文件损坏或格式错误');
+      }
+    },
+
+    // 解析 DOCX
+    async parseDocx(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({arrayBuffer});
+      return result.value;
+    },
+
+    // 解析 PDF
+    async parsePdf(file) {
+      const arrayBuffer = await file.arrayBuffer();
+      const loadingTask = pdfjsLib.getDocument({data: arrayBuffer});
+      const pdf = await loadingTask.promise;
+      let fullText = "";
+
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join('');
+        fullText += pageText + "\n";
+      }
+      return fullText;
+    },
+
+    // 清洗解析出的文本
+    cleanExtractedText(text) {
+      return text
+          .replace(/\t/g, ' ')
+          .trim();
     }
   }
 }
 </script>
 
 <style scoped>
-.UploadContainer {
-
-}
-
 .header {
   text-align: center;
   margin-bottom: 20px;
@@ -162,13 +253,20 @@ export default {
 }
 
 .dialog-content {
-  padding: 20px;
+  padding: 10px 20px 20px;
 }
 
-.van-cell {
+/* 标题输入框样式微调 */
+.title-input {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #f2f3f5;
+}
+
+/* 正文输入框样式微调 */
+.content-input {
+  max-height: 400px;
   overflow-y: auto;
-  line-height: 1.6;
-  padding: 0 !important;
+  padding: 10px 0 !important;
 }
 
 .file-upload-area {
