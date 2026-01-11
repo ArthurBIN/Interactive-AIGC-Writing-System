@@ -8,6 +8,16 @@
       </div>
     </van-overlay>
 
+    <div class="TopBox">
+      <div class="LeftGroup">
+        <div class="BackButton" @click="goBack">
+          <i class="iconfont icon-fanhui"></i>
+        </div>
+      </div>
+
+      <div class="TopTitle">作文智评</div>
+    </div>
+
     <div v-if="!loading && content" class="analysis-content">
       <div class="score-card">
         <div class="score-label">综合评分</div>
@@ -37,11 +47,47 @@
 
       <div class="footer-tip">点击高亮部分查看 AI 老师的点评</div>
     </div>
+
+    <van-popup
+        v-model="popShow"
+        round
+        position="bottom"
+        :style="{ height: '40%' }"
+        closeable
+    >
+      <div class="PopContent" v-if="popContent">
+        <div class="pop-header">
+          <span :class="['pop-tag', `tag-${popContent.type}`]">
+            {{ getMarkTitle(popContent.type) }}
+          </span>
+        </div>
+
+        <div class="pop-original">
+          <div class="label">原文片段</div>
+          <div class="text"
+               :class="(popContent.type === 'error' || popContent.type === 'suggestion') ? 'text-error' : ''"
+          >
+            {{ popContent.original }}
+          </div>
+        </div>
+
+        <div class="pop-suggestion" v-if="popContent.suggestion">
+          <div class="label">修改建议</div>
+          <div class="text highlight-text">{{ popContent.suggestion }}</div>
+        </div>
+
+        <div class="pop-reason">
+          <div class="label">批注详情</div>
+          <div class="text quote">{{ popContent.reason }}</div>
+        </div>
+      </div>
+    </van-popup>
   </div>
 </template>
 
 <script>
 import {Dialog, Toast} from 'vant';
+import {getCompositionById, saveComposition} from "@/api/composition";
 
 export default {
   name: 'AnalysisPage',
@@ -56,7 +102,9 @@ export default {
         score: 0,
         summary: '',
         annotations: []
-      }
+      },
+      popShow: false,
+      popContent: null,
     };
   },
   computed: {
@@ -104,7 +152,7 @@ export default {
     initPage() {
       const id = this.$route.params.id;
       if (id) {
-        console.log("加载历史 ID:", id);
+        this.loadHistoryData(id)
       } else {
         const localData = localStorage.getItem('temp_composition_data');
         if (localData) {
@@ -115,6 +163,20 @@ export default {
         } else {
           this.handleEmpty();
         }
+      }
+    },
+
+    async loadHistoryData(id) {
+      this.loading = true;
+      try {
+        const data = await getCompositionById(id);
+        this.title = data.title;
+        this.content = data.content;
+        this.aiResult = data.result;
+      } catch (err) {
+        Toast.fail('获取历史数据失败');
+      } finally {
+        this.loading = false;
       }
     },
 
@@ -197,23 +259,29 @@ export default {
           rawResult.annotations = this.fixAnnotations(rawResult.annotations);
         }
 
+        // 2. 整体存储：不拆开，直接存入 result 字段
+        const savedData = await saveComposition({
+          title: this.title,
+          content: this.content,
+          result: rawResult
+        });
+
         this.aiResult = rawResult;
-        Toast.success('分析完成');
+
+        if (savedData?.id) {
+          this.$router.replace(`/analysis/${savedData.id}`);
+        }
+        localStorage.removeItem('temp_composition_data');
       } catch (error) {
-        console.error('AI 请求错误:', error);
-        Toast.fail('解析异常，请重试');
+        Toast.fail('解析或存档异常');
       } finally {
         this.loading = false;
       }
     },
 
     handleMarkClick(info) {
-      Dialog.alert({
-        title: this.getMarkTitle(info.type),
-        message: `【原文】${info.original}\n${info.suggestion ? '【建议】' + info.suggestion : ''}\n【批注】${info.reason}`,
-        theme: 'round-button',
-        confirmButtonColor: '#1989fa'
-      });
+      this.popContent = info;
+      this.popShow = true;
     },
 
     getMarkTitle(type) {
@@ -221,21 +289,58 @@ export default {
         error: '语法改进',
         highlight: '名师赏析',
         suggestion: '逻辑优化',
-        idiom: '词汇出彩',
         structure: '篇章布局',
-        emotion: '情感意境'
       };
       return titles[type] || '详情';
     },
 
     handleEmpty() {
       Dialog.alert({message: '未找到内容'}).then(() => this.$router.replace('/upload'));
-    }
+    },
+
+    goBack() {
+      this.$router.back();
+    },
   }
 }
 </script>
 
 <style scoped>
+.TopBox {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 56px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  box-sizing: border-box;
+  z-index: 100;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.LeftGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.BackButton {
+  font-size: 20px;
+  color: #333;
+}
+
+.TopTitle {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+}
+
 .full-loading {
   background-color: #ffffff !important;
   display: flex;
@@ -255,10 +360,11 @@ export default {
 }
 
 .AnalysisContainer {
-  min-height: 100vh;
   background-color: #f4f6f8;
-  padding: 16px;
-  padding-bottom: 50px;
+}
+
+.analysis-content {
+  padding: 66px 16px 50px;
 }
 
 .score-card {
@@ -348,5 +454,99 @@ export default {
   color: #bbb;
   font-size: 12px;
   margin-top: 20px;
+}
+
+/* 弹窗整体内边距 */
+.PopContent {
+  padding: 24px 20px;
+  background-color: #fff;
+}
+
+.pop-header {
+  margin-bottom: 20px;
+}
+
+/* 标签样式 */
+.pop-tag {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* 不同类型标签的色彩映射 */
+.tag-error {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.tag-highlight {
+  background: #fffbe6;
+  color: #faad14;
+}
+
+.tag-suggestion {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.tag-idiom {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.tag-structure {
+  background: #f9f0ff;
+  color: #722ed1;
+}
+
+.tag-emotion {
+  background: #fff0f6;
+  color: #eb2f96;
+}
+
+/* 模块通用样式 */
+.pop-original, .pop-suggestion, .pop-reason {
+  margin-bottom: 18px;
+}
+
+.label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+
+/* 原文展示 */
+.pop-original .text {
+  font-size: 15px;
+  color: #666;
+}
+
+.pop-original .text-error {
+  text-decoration: line-through;
+}
+
+/* 建议文字突出显示 */
+.highlight-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #52c41a; /* 建议通常用正面色彩展示 */
+}
+
+/* 引用块样式（用于批注理由） */
+.quote {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.6;
+  padding-left: 12px;
+  border-left: 4px solid #eee;
+  font-style: italic;
+}
+
+/* 针对结构点评等的特殊样式微调 */
+.pop-reason .text {
+  white-space: pre-line;
 }
 </style>

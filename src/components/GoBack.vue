@@ -24,6 +24,5 @@ export default {
   line-height: 30px;
   background-color: #fff;
   border-radius: 20px;
-  color: #476449;
 }
 </style>
