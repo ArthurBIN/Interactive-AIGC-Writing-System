@@ -14,7 +14,7 @@
           class="RecordCard"
           v-for="(item, index) in filteredLists"
           :key="index"
-          @click="goInfoPage(item.id, item.title)">
+          @click="handleClick(item)">
         <div class="RecordHeader">
           <div class="RecordTitle">
             {{ item.title || `随记-${formatDate(item.updated_at)}` }}
@@ -59,23 +59,26 @@ export default {
       userId: "",
       infoLists: [],
       isLoading: true,
-      searchQuery: "" // 添加搜索功能支持
+      searchQuery: "",
     }
   },
 
   computed: {
-    // 过滤后的列表
     filteredLists() {
       if (!this.searchQuery) return this.infoLists;
       return this.infoLists.filter(item =>
           item.title?.includes(this.searchQuery) ||
           JSON.stringify(item.messages).includes(this.searchQuery)
       );
-    }
+    },
   },
 
   async mounted() {
     await this.checkUser();
+  },
+
+  beforeDestroy() {
+    this.clearPressTimer();
   },
 
   methods: {
@@ -96,7 +99,6 @@ export default {
       this.$router.push("/login");
     },
 
-    // 获取聊天历史 (Supabase版)
     async getHistory() {
       try {
         const data = await getUserChatList(this.userId);
@@ -109,13 +111,21 @@ export default {
       }
     },
 
-    // 前往聊天详情页
-    goInfoPage(chatId, title) {
+    // 清除定时器
+    clearPressTimer() {
+      if (this.pressTimer) {
+        clearTimeout(this.pressTimer);
+        this.pressTimer = null;
+      }
+    },
+
+    // 处理点击事件
+    handleClick(item) {
       this.$router.push({
         path: "/chat",
         query: {
-          chat_id: chatId,
-          style: title
+          chat_id: item.id,
+          style: item.title
         }
       });
     },
@@ -142,20 +152,21 @@ export default {
       const m = (date.getMonth() + 1).toString().padStart(2, '0');
       const d = date.getDate().toString().padStart(2, '0');
       const hh = date.getHours().toString().padStart(2, '0');
-      date.getMinutes().toString().padStart(2, '0');
-      return `${y}-${m}-${d} ${hh}:${hh}`;
-    }
+      const mm = date.getMinutes().toString().padStart(2, '0');
+      return `${y}-${m}-${d} ${hh}:${mm}`;
+    },
 
   }
 }
 </script>
+
 <style scoped>
+/* 保持原有样式不变 */
 .All {
   width: 100%;
   padding-bottom: 20px;
 }
 
-/* 头部搜索区域 */
 .Header {
   width: 100%;
   padding: 16px;
@@ -200,19 +211,16 @@ export default {
   color: #999;
 }
 
-/* 骨架屏 */
 .SkeletonBox {
   padding: 20px 16px;
 }
 
-/* 记录列表 */
 .RecordList {
   width: 100%;
   padding: 16px;
   box-sizing: border-box;
 }
 
-/* 记录卡片 */
 .RecordCard {
   width: 100%;
   background: #fff;
@@ -223,6 +231,12 @@ export default {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.RecordCard:active {
+  transform: scale(0.98);
 }
 
 .RecordHeader {
@@ -273,7 +287,6 @@ export default {
   color: #999;
 }
 
-/* 空状态 */
 .EmptyState {
   padding: 60px 20px;
 }
@@ -287,7 +300,6 @@ export default {
   font-size: 15px;
 }
 
-/* 滚动条优化 */
 .All::-webkit-scrollbar {
   width: 0;
   display: none;
