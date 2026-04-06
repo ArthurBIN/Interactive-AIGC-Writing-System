@@ -51,3 +51,13 @@ export const getSession = async () => {
     const { data: { session }, error } = await supabase.auth.getSession()
     return { session, error }
 }
+
+/**
+ * 发送密码重置邮件
+ */
+export const resetPassword = async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/login'
+    })
+    if (error) throw error
+}

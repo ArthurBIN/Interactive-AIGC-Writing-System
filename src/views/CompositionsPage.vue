@@ -6,29 +6,39 @@
         finished-text="没有更多历史记录了"
         @load="onLoad"
     >
-      <div
-          class="composition-card"
+      <van-swipe-cell
           v-for="item in list"
           :key="item.id"
-          @click="goDetail(item.id)"
+          class="swipe-cell"
       >
-        <div class="card-main">
-          <h3 class="card-title van-ellipsis">{{ item.title || '无标题作文' }}</h3>
-          <div class="card-info">
-            <span class="card-time">{{ formatDate(item.created_at) }}</span>
+        <div class="composition-card" @click="goDetail(item.id)">
+          <div class="card-main">
+            <h3 class="card-title van-ellipsis">{{ item.title || '无标题作文' }}</h3>
+            <div class="card-info">
+              <span class="card-time">{{ formatDate(item.created_at) }}</span>
+            </div>
+          </div>
+          <div class="card-score" :class="getScoreClass(item.result?.score)">
+            <span class="score-val">{{ item.result?.score || 0 }}</span>
+            <span class="score-unit">分</span>
           </div>
         </div>
-        <div class="card-score" :class="getScoreClass(item.result?.score)">
-          <span class="score-val">{{ item.result?.score || 0 }}</span>
-          <span class="score-unit">分</span>
-        </div>
-      </div>
+
+        <template #right>
+          <van-button
+              class="delete-btn"
+              type="danger"
+              @click="handleDelete(item.id)"
+          >删除</van-button>
+        </template>
+      </van-swipe-cell>
     </van-list>
   </div>
 </template>
 
 <script>
-import {getCompositionList} from '@/api/composition';
+import {getCompositionList, deleteComposition} from '@/api/composition';
+import {Dialog, Toast} from 'vant';
 import dayjs from 'dayjs';
 
 export default {
@@ -62,6 +72,23 @@ export default {
     goDetail(id) {
       this.$router.push(`/analysis/${id}`);
     },
+    handleDelete(id) {
+      Dialog.confirm({
+        title: '删除确认',
+        message: '确定要删除这条批改记录吗？删除后不可恢复。',
+        confirmButtonColor: '#ee0a24',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+      }).then(async () => {
+        try {
+          await deleteComposition(id);
+          this.list = this.list.filter(item => item.id !== id);
+          Toast.success('删除成功');
+        } catch (e) {
+          Toast.fail('删除失败');
+        }
+      }).catch(() => {});
+    },
     formatDate(date) {
       return dayjs(date).format('YYYY-MM-DD HH:mm');
     },
@@ -85,7 +112,6 @@ export default {
   background: #fff;
   border-radius: 12px;
   padding: 16px;
-  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -136,6 +162,24 @@ export default {
 .score-unit {
   font-size: 10px;
   margin-top: -2px;
+}
+
+.swipe-cell {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.swipe-cell .composition-card {
+  margin-bottom: 0;
+}
+
+.delete-btn {
+  height: 100%;
+  border-radius: 0;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 /* 分数颜色等级 */

@@ -10,29 +10,39 @@
     <van-skeleton title :row="3" v-if="isLoading" class="SkeletonBox"/>
 
     <div class="RecordList" v-if="userId && filteredLists.length > 0 && !isLoading">
-      <div
-          class="RecordCard"
+      <van-swipe-cell
           v-for="(item, index) in filteredLists"
           :key="index"
-          @click="handleClick(item)">
-        <div class="RecordHeader">
-          <div class="RecordTitle">
-            {{ item.title || `随记-${formatDate(item.updated_at)}` }}
+          class="SwipeCell"
+      >
+        <div class="RecordCard" @click="handleClick(item)">
+          <div class="RecordHeader">
+            <div class="RecordTitle">
+              {{ item.title || `随记-${formatDate(item.updated_at)}` }}
+            </div>
+            <div class="RecordAction">
+              <span>查看</span>
+              <i class="iconfont icon-xiangyoujiantou"></i>
+            </div>
           </div>
-          <div class="RecordAction">
-            <span>查看</span>
-            <i class="iconfont icon-xiangyoujiantou"></i>
+
+          <div class="RecordContent">
+            {{ getLatestMessage(item.messages) }}
+          </div>
+
+          <div class="RecordTime">
+            {{ formatDateTime(item.updated_at) }}
           </div>
         </div>
 
-        <div class="RecordContent">
-          {{ getLatestMessage(item.messages) }}
-        </div>
-
-        <div class="RecordTime">
-          {{ formatDateTime(item.updated_at) }}
-        </div>
-      </div>
+        <template #right>
+          <van-button
+              class="DeleteBtn"
+              type="danger"
+              @click="handleDelete(item.id)"
+          >删除</van-button>
+        </template>
+      </van-swipe-cell>
     </div>
 
     <van-empty description="请您先登录" v-if="!userId && !isLoading" class="EmptyState">
@@ -48,9 +58,9 @@
 </template>
 
 <script>
-import {Toast} from "vant";
+import {Dialog, Toast} from "vant";
 import {supabase} from '@/config/supabase';
-import {getUserChatList} from "@/api/chat";
+import {getUserChatList, deleteChat} from "@/api/chat";
 
 export default {
   name: "EditItemPage",
@@ -75,10 +85,6 @@ export default {
 
   async mounted() {
     await this.checkUser();
-  },
-
-  beforeDestroy() {
-    this.clearPressTimer();
   },
 
   methods: {
@@ -111,12 +117,23 @@ export default {
       }
     },
 
-    // 清除定时器
-    clearPressTimer() {
-      if (this.pressTimer) {
-        clearTimeout(this.pressTimer);
-        this.pressTimer = null;
-      }
+    // 删除对话记录
+    handleDelete(id) {
+      Dialog.confirm({
+        title: '删除确认',
+        message: '确定要删除这条对话记录吗？删除后不可恢复。',
+        confirmButtonColor: '#ee0a24',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+      }).then(async () => {
+        try {
+          await deleteChat(id);
+          this.infoLists = this.infoLists.filter(item => item.id !== id);
+          Toast.success('删除成功');
+        } catch (e) {
+          Toast.fail('删除失败');
+        }
+      }).catch(() => {});
     },
 
     // 处理点击事件
@@ -303,5 +320,23 @@ export default {
 .All::-webkit-scrollbar {
   width: 0;
   display: none;
+}
+
+.SwipeCell {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.SwipeCell .RecordCard {
+  margin-bottom: 0;
+}
+
+.DeleteBtn {
+  height: 100%;
+  border-radius: 0;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 500;
 }
 </style>

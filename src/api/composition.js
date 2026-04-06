@@ -52,6 +52,18 @@ export const updateComposition = async (id, updateData) => {
 }
 
 /**
+ * 删除作文分析记录
+ */
+export const deleteComposition = async (id) => {
+    const {error} = await supabase
+        .from('compositions')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw error;
+}
+
+/**
  * 获取作文列表（用于目录页/历史记录页）
  * 按照创建时间倒序排列
  */

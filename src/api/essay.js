@@ -53,3 +53,15 @@ export const updateEssay = async (id, updateData) => {
     if (error) throw error;
     return data;
 }
+
+/**
+ * 删除作文
+ */
+export const deleteEssay = async (id) => {
+    const {error} = await supabase
+        .from('essays')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw error;
+}

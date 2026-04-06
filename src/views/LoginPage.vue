@@ -45,8 +45,28 @@
       <div class="registerBox">
         <div v-if="titleItem === 1" @click="titleItem = 2">立即注册</div>
         <div v-else @click="titleItem = 1">已有账号？去登录</div>
-        <div v-if="titleItem === 1">忘记密码</div>
+        <div v-if="titleItem === 1" class="ForgotLink" @click="showResetDialog = true">忘记密码</div>
       </div>
+
+      <!-- 重置密码弹窗 -->
+      <van-dialog
+          v-model="showResetDialog"
+          title="重置密码"
+          show-cancel-button
+          confirm-button-text="发送邮件"
+          cancel-button-text="取消"
+          :before-close="onBeforeCloseReset"
+      >
+        <div class="ResetContent">
+          <p class="ResetTip">输入注册时的邮箱，我们将发送重置链接</p>
+          <input
+              type="email"
+              v-model="resetEmail"
+              class="ResetInput"
+              placeholder="请输入邮箱地址"
+          />
+        </div>
+      </van-dialog>
 
       <van-button
           class="LoginBtn"
@@ -63,7 +83,7 @@
 <script>
 // Vant 2 引入方式
 import { Toast } from 'vant';
-import { loginUser, registerUser } from "@/api/auth";
+import { loginUser, registerUser, resetPassword } from "@/api/auth";
 
 export default {
   name: "LoginPage",
@@ -75,6 +95,8 @@ export default {
       confirmPassword: "",
       regUsername: "",
       loading: false,
+      showResetDialog: false,
+      resetEmail: "",
     }
   },
   methods: {
@@ -114,6 +136,27 @@ export default {
         Toast.fail(err.message || "登录失败");
       } finally {
         this.loading = false;
+      }
+    },
+
+    // 重置密码弹窗确认
+    async onBeforeCloseReset(action, done) {
+      if (action !== 'confirm') {
+        this.resetEmail = '';
+        return done();
+      }
+      if (!this.resetEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.resetEmail)) {
+        Toast('请输入正确的邮箱地址');
+        return done(false);
+      }
+      try {
+        await resetPassword(this.resetEmail);
+        Toast.success('重置链接已发送，请查收邮件');
+        this.resetEmail = '';
+        done();
+      } catch (e) {
+        Toast.fail(e.message || '发送失败，请稍后重试');
+        done(false);
       }
     },
 
@@ -248,5 +291,36 @@ h1 {
 }
 .registerBox div:nth-child(2) {
   text-align: right;
+}
+
+.ForgotLink {
+  color: #1989fa;
+  cursor: pointer;
+}
+
+.ResetContent {
+  padding: 16px 20px 8px;
+}
+
+.ResetTip {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.ResetInput {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 15px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.ResetInput:focus {
+  border-color: #1989fa;
 }
 </style>

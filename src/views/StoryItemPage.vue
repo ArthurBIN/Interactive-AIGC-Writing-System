@@ -3,31 +3,51 @@
     <van-skeleton title :row="3" v-if="isLoading" class="SkeletonBox"/>
 
     <div class="StoryList" v-if="userId && essayLists.length > 0 && !isLoading">
-      <div
-          class="StoryCard"
+      <van-swipe-cell
           v-for="item in essayLists"
           :key="item.id"
-          @click="goToStoryDetail(item)">
+          class="SwipeCell"
+      >
+        <div class="StoryCard" @click="goToStoryDetail(item)">
+          <div class="StoryHeader">
+            <div class="StoryTitle">{{ item.title || '无标题作文' }}</div>
+            <div class="StoryAction">
+              <i class="iconfont icon-xiangyoujiantou"></i>
+            </div>
+          </div>
 
-        <div class="StoryHeader">
-          <div class="StoryTitle">{{ item.title || '无标题作文' }}</div>
-          <div class="StoryAction">
-            <i class="iconfont icon-xiangyoujiantou"></i>
+          <div class="StoryContent">
+            {{ item.content }}
+          </div>
+
+          <div class="StoryFooter">
+            <div class="StoryTime">
+              <i class="iconfont icon-time"></i>
+              {{ formatTime(item.created_at) }}
+            </div>
+            <div class="StoryStyleTag" v-if="item.style">{{ item.style }}</div>
+          </div>
+
+          <!-- 构思对话关联入口 -->
+          <div
+              class="ChatLink"
+              v-if="item.chat_id"
+              @click.stop="goToChat(item.chat_id, item.style)"
+          >
+            <van-icon name="chat-o"/>
+            <span>查看构思对话</span>
+            <van-icon name="arrow"/>
           </div>
         </div>
 
-        <div class="StoryContent">
-          {{ item.content }}
-        </div>
-
-        <div class="StoryFooter">
-          <div class="StoryTime">
-            <i class="iconfont icon-time"></i>
-            {{ formatTime(item.created_at) }}
-          </div>
-          <div class="StoryStyleTag" v-if="item.style">{{ item.style }}</div>
-        </div>
-      </div>
+        <template #right>
+          <van-button
+              class="DeleteBtn"
+              type="danger"
+              @click="handleDelete(item.id)"
+          >删除</van-button>
+        </template>
+      </van-swipe-cell>
     </div>
 
     <van-empty description="请您先登录" v-if="!userId && !isLoading" class="EmptyState">
@@ -40,9 +60,9 @@
 </template>
 
 <script>
-import {Toast} from "vant";
+import {Dialog, Toast} from "vant";
 import {supabase} from '@/config/supabase';
-import {getUserEssays} from "@/api/essay";
+import {getUserEssays, deleteEssay} from "@/api/essay";
 
 export default {
   name: "StoryItemPage",
@@ -97,6 +117,33 @@ export default {
     // 前往登录
     goLogin() {
       this.$router.push("/login");
+    },
+
+    // 删除作文
+    handleDelete(id) {
+      Dialog.confirm({
+        title: '删除确认',
+        message: '确定要删除这篇作文吗？删除后不可恢复。',
+        confirmButtonColor: '#ee0a24',
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+      }).then(async () => {
+        try {
+          await deleteEssay(id);
+          this.essayLists = this.essayLists.filter(item => item.id !== id);
+          Toast.success('删除成功');
+        } catch (e) {
+          Toast.fail('删除失败');
+        }
+      }).catch(() => {});
+    },
+
+    // 前往构思对话
+    goToChat(chatId, style) {
+      this.$router.push({
+        path: '/chat',
+        query: {chat_id: chatId, style: style || ''}
+      });
     },
 
     // 前往预览详情
@@ -208,5 +255,42 @@ export default {
   background-color: #333;
   color: #fff;
   border: none;
+}
+
+.SwipeCell {
+  margin-bottom: 14px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.SwipeCell .StoryCard {
+  margin-bottom: 0;
+}
+
+.DeleteBtn {
+  height: 100%;
+  border-radius: 0;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* 构思对话关联 */
+.ChatLink {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 10px;
+  padding: 7px 10px;
+  background: #ecf5ff;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #1989fa;
+  border: 1px solid #d0e8ff;
+}
+
+.ChatLink span {
+  flex: 1;
+  font-size: 12px;
 }
 </style>

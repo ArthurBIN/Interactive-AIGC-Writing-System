@@ -133,14 +133,15 @@ export default {
     async afterReadFile(file) {
       const originFile = file.file;
       const fileName = originFile.name;
+      const lowerName = fileName.toLowerCase();
 
       Toast.loading({message: '正在解析...', forbidClick: true, duration: 0});
 
       try {
         let extractedText = "";
-        if (fileName.toLowerCase().endsWith('.docx')) {
+        if (lowerName.endsWith('.docx') || lowerName.endsWith('.doc')) {
           extractedText = await this.parseDocx(originFile);
-        } else if (fileName.toLowerCase().endsWith('.pdf')) {
+        } else if (lowerName.endsWith('.pdf')) {
           extractedText = await this.parsePdf(originFile);
         } else {
           Toast.fail('格式不支持');
@@ -160,14 +161,22 @@ export default {
         Toast.success('解析成功');
       } catch (error) {
         console.error('解析失败:', error);
-        Toast.fail('文件损坏或格式错误');
+        const lowerName = originFile.name.toLowerCase();
+        if (lowerName.endsWith('.doc')) {
+          Toast.fail('解析失败，建议在 Word 中将文件另存为 .docx 格式后重新上传');
+        } else {
+          Toast.fail('文件损坏或格式错误');
+        }
       }
     },
 
-    // 解析 DOCX
+    // 解析 DOCX / DOC（mammoth 对 .doc 有限支持）
     async parseDocx(file) {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.extractRawText({arrayBuffer});
+      if (!result.value || !result.value.trim()) {
+        throw new Error('提取内容为空');
+      }
       return result.value;
     },
 

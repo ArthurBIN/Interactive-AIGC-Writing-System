@@ -16,13 +16,35 @@
       </div>
 
       <div class="TopTitle">作文智评</div>
+
+      <div class="RightGroup" v-if="currentId && !loading">
+        <div class="ReAnalyzeBtn" @click="confirmReAnalyze">
+          <i class="iconfont icon-replay"></i>
+          <span>重新分析</span>
+        </div>
+      </div>
     </div>
 
     <div v-if="!loading && content" class="analysis-content">
       <div class="score-card">
-        <div class="score-label">综合评分</div>
-        <div class="score-num">{{ aiResult.score || 0 }}<span>分</span></div>
+        <!-- 综合分数区 -->
+        <div class="score-top-row">
+          <div class="score-main">
+            <div class="score-label">综合评分</div>
+            <div class="score-num">{{ aiResult.score || 0 }}<span>分</span></div>
+            <div class="score-level-tag" :class="getScoreLevelClass(aiResult.score)">
+              {{ getScoreLevelText(aiResult.score) }}
+            </div>
+          </div>
+        </div>
+
         <p class="summary-text">{{ aiResult.summary || 'AI 正在分析中...' }}</p>
+
+        <!-- 多维度雷达图 -->
+        <div class="radar-section" v-if="aiResult.dimensions && aiResult.dimensions.length === 5">
+          <div class="radar-title">多维度评分</div>
+          <RadarChart :scores="aiResult.dimensions" :size="200"/>
+        </div>
       </div>
 
       <article class="paper-body">
@@ -87,10 +109,12 @@
 
 <script>
 import {Dialog, Toast} from 'vant';
-import {getCompositionById, saveComposition} from "@/api/composition";
+import {getCompositionById, saveComposition, updateComposition} from "@/api/composition";
+import RadarChart from "@/components/RadarChart.vue";
 
 export default {
   name: 'AnalysisPage',
+  components: {RadarChart},
   data() {
     return {
       title: '',
@@ -98,8 +122,10 @@ export default {
       loading: false,
       loadingTip: 'AI 老师正在批阅...',
       apiKey: process.env.VUE_APP_MOONSHOT_API_KEY,
+      currentId: null,
       aiResult: {
         score: 0,
+        dimensions: null,
         summary: '',
         annotations: []
       },
@@ -152,6 +178,7 @@ export default {
     initPage() {
       const id = this.$route.params.id;
       if (id) {
+        this.currentId = id;
         this.loadHistoryData(id)
       } else {
         const localData = localStorage.getItem('temp_composition_data');
@@ -196,7 +223,19 @@ export default {
       }).filter(note => this.content.substring(note.startIndex, note.endIndex) === note.original);
     },
 
-    async startAiAnalysis() {
+    confirmReAnalyze() {
+      Dialog.confirm({
+        title: '重新分析',
+        message: '将重新调用 AI 对当前作文进行批改，并覆盖原有结果，确认继续吗？',
+        confirmButtonText: '确认',
+        cancelButtonText: '取消',
+        confirmButtonColor: '#1989fa',
+      }).then(() => {
+        this.startAiAnalysis(true);
+      }).catch(() => {});
+    },
+
+    async startAiAnalysis(isReAnalyze = false) {
       if (!this.apiKey) {
         Toast.fail('未配置 API Key');
         return;
@@ -207,30 +246,31 @@ export default {
 
       const systemPrompt = {
         role: "system",
-        content: `你是一位全能的语文名师。请从多个维度深度分析作文并返回 JSON 报告。
+        content: `你是一位全能的语文名师。请对作文进行深度分析，返回严格符合格式的 JSON 报告。
 
-        【点评维度（type）】：
-        1. error: 错别字或语法错误
-        2. highlight: 写作亮点或金句
-        3. suggestion: 逻辑不通或内容干瘪的修改建议
-        4. structure: 段落过渡或文章结构层面的点评
+【五维评分】dimensions 数组按顺序对应（每项 0-100 整数）：
+[内容立意, 结构布局, 语言表达, 情感共鸣, 创意亮点]
 
-        【必须遵守的数据结构】：
-        所有维度的批注必须统一放在一个 "annotations" 数组里。
+【批注维度（type）】：
+1. error: 错别字或语法错误
+2. highlight: 写作亮点或金句
+3. suggestion: 逻辑不通或内容干瘪的修改建议
+4. structure: 段落过渡或文章结构层面的点评
 
-        【JSON 示例】：
-        {
-          "score": 90,
-          "summary": "文章整体点评...",
-          "annotations": [
-            { "original": "片段", "suggestion": "建议内容", "reason": "理由", "startIndex": 0, "endIndex": 2, "type": "error" },
-            { "original": "片段", "suggestion": "", "reason": "理由", "startIndex": 5, "endIndex": 10, "type": "structure" }
-          ]
-        }
+【JSON 结构】：
+{
+  "score": 88,
+  "dimensions": [85, 90, 88, 82, 80],
+  "summary": "整体点评，2-3句话",
+  "annotations": [
+    { "original": "原文片段", "suggestion": "修改建议", "reason": "批注理由", "startIndex": 0, "endIndex": 4, "type": "error" }
+  ]
+}
 
-        【规则】：
-        1. original 必须与原文完全一致。
-        2. 不要返回任何 JSON 以外的文字。`
+【规则】：
+1. original 必须与原文完全一致，可用于 indexOf 定位。
+2. dimensions 必须是长度为 5 的整数数组。
+3. 只输出 JSON，不要有任何其他文字。`
       };
 
       try {
@@ -259,19 +299,29 @@ export default {
           rawResult.annotations = this.fixAnnotations(rawResult.annotations);
         }
 
-        // 2. 整体存储：不拆开，直接存入 result 字段
-        const savedData = await saveComposition({
-          title: this.title,
-          content: this.content,
-          result: rawResult
-        });
-
         this.aiResult = rawResult;
 
-        if (savedData?.id) {
-          this.$router.replace(`/analysis/${savedData.id}`);
+        if (isReAnalyze && this.currentId) {
+          // 重新分析：更新已有记录
+          await updateComposition(this.currentId, {
+            title: this.title,
+            content: this.content,
+            result: rawResult
+          });
+          Toast.success('重新分析完成');
+        } else {
+          // 首次分析：创建新记录
+          const savedData = await saveComposition({
+            title: this.title,
+            content: this.content,
+            result: rawResult
+          });
+          if (savedData?.id) {
+            this.currentId = savedData.id;
+            this.$router.replace(`/analysis/${savedData.id}`);
+          }
+          localStorage.removeItem('temp_composition_data');
         }
-        localStorage.removeItem('temp_composition_data');
       } catch (error) {
         Toast.fail('解析或存档异常');
       } finally {
@@ -292,6 +342,24 @@ export default {
         structure: '篇章布局',
       };
       return titles[type] || '详情';
+    },
+
+    getScoreLevelText(score) {
+      if (!score) return '';
+      if (score >= 90) return '优秀';
+      if (score >= 80) return '良好';
+      if (score >= 70) return '中等';
+      if (score >= 60) return '及格';
+      return '待提升';
+    },
+
+    getScoreLevelClass(score) {
+      if (!score) return '';
+      if (score >= 90) return 'level-excellent';
+      if (score >= 80) return 'level-good';
+      if (score >= 70) return 'level-medium';
+      if (score >= 60) return 'level-pass';
+      return 'level-fail';
     },
 
     handleEmpty() {
@@ -332,6 +400,26 @@ export default {
   color: #333;
 }
 
+.RightGroup {
+  display: flex;
+  align-items: center;
+}
+
+.ReAnalyzeBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #1989fa;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(25, 137, 250, 0.08);
+}
+
+.ReAnalyzeBtn i {
+  font-size: 14px;
+}
+
 .TopTitle {
   position: absolute;
   left: 50%;
@@ -370,32 +458,78 @@ export default {
 .score-card {
   background: #fff;
   border-radius: 16px;
-  padding: 24px;
-  text-align: center;
+  padding: 20px;
   margin-bottom: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
+.score-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.score-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .score-label {
-  font-size: 14px;
+  font-size: 13px;
   color: #999;
+  margin-bottom: 2px;
 }
 
 .score-num {
-  font-size: 44px;
+  font-size: 48px;
   font-weight: bold;
   color: #1989fa;
+  line-height: 1;
 }
 
 .score-num span {
   font-size: 16px;
+  font-weight: normal;
+  margin-left: 2px;
 }
+
+.score-level-tag {
+  margin-top: 6px;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.level-excellent { background: #f0f9f4; color: #07c160; }
+.level-good { background: #ecf5ff; color: #1989fa; }
+.level-medium { background: #fff8e6; color: #ff976a; }
+.level-pass { background: #fff3e6; color: #ff6900; }
+.level-fail { background: #fff0f0; color: #ee0a24; }
 
 .summary-text {
   font-size: 14px;
   color: #666;
-  line-height: 1.6;
-  margin-top: 10px;
+  line-height: 1.7;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid #1989fa;
+}
+
+.radar-section {
+  border-top: 1px solid #f5f5f5;
+  padding-top: 16px;
+}
+
+.radar-title {
+  font-size: 13px;
+  color: #999;
+  text-align: center;
+  margin-bottom: 12px;
 }
 
 .paper-body {
