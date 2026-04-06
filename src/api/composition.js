@@ -73,10 +73,14 @@ export const deleteComposition = async (id) => {
  * 按照创建时间倒序排列
  */
 export const getCompositionList = async () => {
+    const {data: {user}} = await supabase.auth.getUser()
+    if (!user) return []
+
     const {data, error} = await supabase
         .from('compositions')
         // 我们只需要查询 ID、标题、存储 AI 结果的对象以及创建时间
         .select('id, title, result, created_at')
+        .eq('user_id', user.id)
         .order('created_at', {ascending: false});
 
     if (error) {

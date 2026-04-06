@@ -36,11 +36,10 @@
         </div>
 
         <template #right>
-          <van-button
-              class="DeleteBtn"
-              type="danger"
-              @click="handleDelete(item.id)"
-          >删除</van-button>
+          <div class="DeleteBtn" @click="handleDelete(item.id)">
+            <van-icon name="delete-o" size="22"/>
+            <span>删除</span>
+          </div>
         </template>
       </van-swipe-cell>
     </div>
@@ -178,40 +177,41 @@ export default {
 </script>
 
 <style scoped>
-/* 保持原有样式不变 */
 .All {
   width: 100%;
+  min-height: 100%;
   padding-bottom: 20px;
 }
 
 .Header {
   width: 100%;
-  padding: 16px;
+  padding: 12px 14px;
   box-sizing: border-box;
   position: sticky;
   top: 50px;
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(244, 245, 247, 0.96);
   backdrop-filter: blur(10px);
   z-index: 10;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #eaecf0;
 }
 
 .SearchBox {
   width: 100%;
-  height: 44px;
-  background-color: #f5f5f5;
-  border-radius: 22px;
+  height: 40px;
+  background-color: #fff;
+  border-radius: 20px;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 14px;
   box-sizing: border-box;
-  border: 1px solid #e5e5e5;
+  border: 1px solid #e0e3e9;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 
 .SearchIcon {
-  font-size: 18px;
-  color: #999;
-  margin-right: 10px;
+  font-size: 16px;
+  color: #aaa;
+  margin-right: 8px;
 }
 
 .SearchInput {
@@ -220,12 +220,12 @@ export default {
   border: none;
   background: transparent;
   outline: none;
-  font-size: 15px;
+  font-size: 14px;
   color: #333;
 }
 
 .SearchInput::placeholder {
-  color: #999;
+  color: #bbb;
 }
 
 .SkeletonBox {
@@ -234,74 +234,89 @@ export default {
 
 .RecordList {
   width: 100%;
-  padding: 16px;
+  padding: 12px 14px;
   box-sizing: border-box;
+}
+
+.SwipeCell {
+  margin-bottom: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
 }
 
 .RecordCard {
   width: 100%;
   background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
+  border-radius: 14px;
+  padding: 15px 16px 13px 20px;
   box-sizing: border-box;
+  border-left: 4px solid #36c48a;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  transition: transform 0.2s;
+  transition: background 0.15s;
   cursor: pointer;
 }
 
+.SwipeCell .RecordCard {
+  margin-bottom: 0;
+  border-radius: 0;
+}
+
 .RecordCard:active {
-  transform: scale(0.98);
+  background: #fafafa;
 }
 
 .RecordHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .RecordTitle {
   flex: 1;
-  font-size: 17px;
-  font-weight: 600;
-  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-right: 10px;
+  padding-right: 8px;
 }
 
 .RecordAction {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  color: #666;
+  gap: 3px;
+  font-size: 12px;
+  color: #36c48a;
   flex-shrink: 0;
+  background: #edfaf4;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid #c5edd9;
 }
 
 .RecordAction i {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .RecordContent {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 12px;
+  font-size: 13px;
+  color: #777;
+  line-height: 1.65;
+  margin-bottom: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
 .RecordTime {
-  font-size: 12px;
-  color: #999;
+  font-size: 11px;
+  color: #b0b5be;
 }
 
 .EmptyState {
@@ -322,21 +337,20 @@ export default {
   display: none;
 }
 
-.SwipeCell {
-  margin-bottom: 12px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.SwipeCell .RecordCard {
-  margin-bottom: 0;
-}
-
 .DeleteBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   height: 100%;
-  border-radius: 0;
-  padding: 0 24px;
-  font-size: 15px;
-  font-weight: 500;
+  min-width: 76px;
+  padding: 0 18px;
+  background: linear-gradient(160deg, #ff6b6b, #d9363e);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
 }
 </style>

@@ -25,11 +25,10 @@
         </div>
 
         <template #right>
-          <van-button
-              class="delete-btn"
-              type="danger"
-              @click="handleDelete(item.id)"
-          >删除</van-button>
+          <div class="delete-btn" @click="handleDelete(item.id)">
+            <van-icon name="delete-o" size="22"/>
+            <span>删除</span>
+          </div>
         </template>
       </van-swipe-cell>
     </van-list>
@@ -104,106 +103,122 @@ export default {
 
 <style scoped>
 .CompositionsContainer {
-  padding: 16px;
+  min-height: 100%;
+  padding: 12px 14px;
   box-sizing: border-box;
+}
+
+.swipe-cell {
+  margin-bottom: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
 }
 
 .composition-card {
   background: #fff;
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: 14px;
+  padding: 16px 16px 16px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s;
+  border-left: 4px solid #fa8c16;
+  transition: background 0.15s;
+}
+
+.swipe-cell .composition-card {
+  border-radius: 0;
 }
 
 .composition-card:active {
-  transform: scale(0.98);
-  background-color: #fafafa;
+  background: #fafafa;
 }
 
 .card-main {
   flex: 1;
   overflow: hidden;
-  margin-right: 12px;
+  margin-right: 14px;
 }
 
 .card-title {
   font-size: 16px;
-  color: #323233;
-  margin: 0 0 8px 0;
-  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 6px 0;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-info {
-  font-size: 12px;
-  color: #969799;
+  font-size: 11px;
+  color: #b0b5be;
 }
 
 /* 分数圆圈样式 */
 .card-score {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 2px solid #ebedf0;
+  border: 2.5px solid #ebedf0;
+  flex-shrink: 0;
 }
 
 .score-val {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 19px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .score-unit {
   font-size: 10px;
-  margin-top: -2px;
-}
-
-.swipe-cell {
-  margin-bottom: 12px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.swipe-cell .composition-card {
-  margin-bottom: 0;
+  margin-top: 2px;
+  opacity: 0.7;
 }
 
 .delete-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   height: 100%;
-  border-radius: 0;
-  padding: 0 24px;
-  font-size: 15px;
-  font-weight: 500;
+  min-width: 76px;
+  padding: 0 18px;
+  background: linear-gradient(160deg, #ff6b6b, #d9363e);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
 }
 
 /* 分数颜色等级 */
 .score-excellent {
   color: #07c160;
-  border-color: #c7f0db;
-  background: #f0f9f4;
+  border-color: #a8e6c5;
+  background: #f0faf5;
 }
 
 .score-good {
   color: #1989fa;
-  border-color: #d1e5ff;
+  border-color: #a8d4ff;
   background: #f0f7ff;
 }
 
 .score-pass {
-  color: #ff976a;
-  border-color: #ffe4d7;
-  background: #fffbe8;
+  color: #fa8c16;
+  border-color: #ffd591;
+  background: #fff8ed;
 }
 
 .score-fail {
   color: #ee0a24;
-  border-color: #ffdada;
+  border-color: #ffb3b3;
   background: #fff1f0;
 }
 </style>

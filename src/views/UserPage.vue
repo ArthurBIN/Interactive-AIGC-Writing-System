@@ -259,10 +259,11 @@ export default {
             .select('id', {count: 'exact', head: true})
             .eq('user_id', userId);
 
-        // 批改记录（Supabase RLS 自动过滤当前用户）
+        // 批改记录（按当前用户过滤）
         const {data: compositions} = await supabase
             .from('compositions')
             .select('result, created_at')
+            .eq('user_id', userId)
             .order('created_at', {ascending: true});
 
         const scores = (compositions || [])

@@ -41,11 +41,10 @@
         </div>
 
         <template #right>
-          <van-button
-              class="DeleteBtn"
-              type="danger"
-              @click="handleDelete(item.id)"
-          >删除</van-button>
+          <div class="DeleteBtn" @click="handleDelete(item.id)">
+            <van-icon name="delete-o" size="22"/>
+            <span>删除</span>
+          </div>
         </template>
       </van-swipe-cell>
     </div>
@@ -162,6 +161,7 @@ export default {
 <style scoped>
 .All {
   width: 100%;
+  min-height: 100%;
   padding-bottom: 20px;
 }
 
@@ -171,56 +171,69 @@ export default {
 
 .StoryList {
   width: 100%;
-  padding: 16px;
+  padding: 12px 14px;
   box-sizing: border-box;
+}
+
+.SwipeCell {
+  margin-bottom: 10px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
 }
 
 .StoryCard {
   width: 100%;
   background: #fff;
-  border-radius: 12px;
-  padding: 18px;
-  margin-bottom: 14px;
+  border-radius: 14px;
+  padding: 16px 16px 14px 20px;
   box-sizing: border-box;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s;
+  border-left: 4px solid #5b6ef5;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.SwipeCell .StoryCard {
+  margin-bottom: 0;
+  border-radius: 0;
 }
 
 .StoryCard:active {
-  transform: scale(0.98);
+  background: #fafafa;
 }
 
 .StoryHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .StoryTitle {
   flex: 1;
-  font-size: 17px;
-  font-weight: 600;
-  color: #111;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding-right: 8px;
 }
 
 .StoryAction {
-  color: #ccc;
-  font-size: 14px;
+  color: #c0c4cc;
+  font-size: 13px;
 }
 
 .StoryContent {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 14px;
+  font-size: 13px;
+  color: #777;
+  line-height: 1.65;
+  margin-bottom: 12px;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 
@@ -234,16 +247,18 @@ export default {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
-  color: #999;
+  font-size: 11px;
+  color: #b0b5be;
 }
 
 .StoryStyleTag {
-  padding: 2px 8px;
-  background: #f0f0f0;
-  color: #666;
+  padding: 2px 10px;
+  background: #eff0ff;
+  color: #5b6ef5;
   font-size: 11px;
-  border-radius: 4px;
+  border-radius: 20px;
+  font-weight: 500;
+  border: 1px solid #dfe1fd;
 }
 
 .EmptyState {
@@ -257,22 +272,21 @@ export default {
   border: none;
 }
 
-.SwipeCell {
-  margin-bottom: 14px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.SwipeCell .StoryCard {
-  margin-bottom: 0;
-}
-
 .DeleteBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   height: 100%;
-  border-radius: 0;
-  padding: 0 24px;
-  font-size: 15px;
-  font-weight: 500;
+  min-width: 76px;
+  padding: 0 18px;
+  background: linear-gradient(160deg, #ff6b6b, #d9363e);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
 }
 
 /* 构思对话关联 */
