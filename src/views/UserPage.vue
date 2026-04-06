@@ -335,7 +335,7 @@ export default {
 
 <style scoped>
 .UserPageContainer {
-  padding: 0 24px 24px;
+  padding: 0 24px 40px;
   box-sizing: border-box;
 }
 
@@ -371,7 +371,7 @@ export default {
   display: flex;
   align-items: center;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
 .AvatarWrapper {
@@ -519,7 +519,7 @@ export default {
 }
 
 .UserContent {
-  padding-top: 70px;
+  padding-top: 30px;
 }
 
 /* 写作诊断卡片 */

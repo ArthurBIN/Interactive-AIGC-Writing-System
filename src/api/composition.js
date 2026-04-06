@@ -4,13 +4,18 @@ import {supabase} from '@/config/supabase'
  * 保存或创建作文分析记录
  */
 export const saveComposition = async (data) => {
+    // 自动从当前 session 获取用户 ID，确保数据归属正确
+    const {data: {user}} = await supabase.auth.getUser()
+    if (!user) throw new Error('用户未登录')
+
     const {data: result, error} = await supabase
         .from('compositions')
         .insert([
             {
+                user_id: user.id,
                 title: data.title,
                 content: data.content,
-                result: data.result, // 这里的 result 是完整的 { score, summary, annotations }
+                result: data.result,
             }
         ])
         .select()
