@@ -20,11 +20,10 @@
       <!-- 消息列表 -->
       <div class="MessageBox" ref="scrollArea">
         <div class="MessageItem" v-for="(item, index) in messageList" :key="index">
+
           <!-- 用户消息 -->
           <div v-if="item.role === 'user'" class="UserMessage">
-            <div class="UserBubble">
-              {{ item.content }}
-            </div>
+            <div class="UserBubble">{{ item.content }}</div>
           </div>
 
           <!-- AI消息 -->
@@ -32,28 +31,61 @@
             <div class="AssistantAvatar">
               <i class="iconfont icon-aislogo"></i>
             </div>
-            <div class="AssistantContent" v-html="render(item.content)"></div>
+
+            <!-- 等待状态：三点跳动（内容为空时显示） -->
+            <div
+                class="TypingBubble"
+                v-if="!item.content && isGenerating && index === messageList.length - 1"
+            >
+              <span class="TypingDot"></span>
+              <span class="TypingDot"></span>
+              <span class="TypingDot"></span>
+            </div>
+
+            <!-- 正常内容（含流式光标） -->
+            <div class="AssistantContent" v-else>
+              <span v-html="render(item.content)"></span>
+              <span
+                  class="StreamCursor"
+                  v-if="isGenerating && index === messageList.length - 1 && item.content"
+              ></span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- 输入区域 -->
       <div class="InputContainer">
-        <div class="InputWrapper">
+        <!-- 生成中状态条 -->
+        <transition name="status-fade">
+          <div class="GeneratingStatus" v-if="isGenerating">
+            <span class="StatusDot"></span>
+            <span>AI 正在回复中...</span>
+          </div>
+        </transition>
+
+        <div class="InputWrapper" :class="{ generating: isGenerating }">
           <textarea
               v-model="inputText"
               ref="autoResizeTextarea"
               class="InputArea"
-              placeholder="发送消息..."
+              :placeholder="isGenerating ? '等待 AI 回复...' : '发送消息...'"
+              :disabled="isGenerating"
               rows="1"
+              @keydown="handleKeydown"
           ></textarea>
 
           <div class="InputActions">
             <div
                 class="SendButton"
-                :class="{ active: inputText.trim() }"
-                @click="sendMessage">
-              <i class="iconfont icon-xiangshang"></i>
+                :class="{
+                  active: inputText.trim() && !isGenerating,
+                  generating: isGenerating
+                }"
+                @click="sendMessage"
+            >
+              <van-loading v-if="isGenerating" size="16px" color="#fff"/>
+              <i v-else class="iconfont icon-xiangshang"></i>
             </div>
           </div>
         </div>
@@ -215,6 +247,14 @@ export default {
       }
     },
 
+
+    handleKeydown(e) {
+      // Enter 发送，Shift+Enter 换行
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        this.sendMessage();
+      }
+    },
 
     adjustTextareaHeight() {
       const textarea = this.$refs.autoResizeTextarea;
@@ -444,6 +484,99 @@ export default {
   padding-top: 4px;
 }
 
+/* 三点等待动画 */
+.TypingBubble {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 18px;
+  background: #ffffff;
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  margin-top: 4px;
+}
+
+.TypingDot {
+  width: 7px;
+  height: 7px;
+  background: #9ca3af;
+  border-radius: 50%;
+  animation: typingBounce 1.3s ease-in-out infinite;
+}
+
+.TypingDot:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.TypingDot:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-7px);
+    opacity: 1;
+  }
+}
+
+/* 流式输出光标 */
+.StreamCursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: #374151;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  animation: cursorBlink 0.9s step-end infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 生成中状态条 */
+.GeneratingStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #2563eb;
+  padding: 0 4px 8px;
+  font-weight: 500;
+}
+
+.StatusDot {
+  width: 6px;
+  height: 6px;
+  background: #2563eb;
+  border-radius: 50%;
+  animation: statusPulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.status-fade-enter-active,
+.status-fade-leave-active {
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.status-fade-enter,
+.status-fade-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
 /* 输入区域 */
 .InputContainer {
   position: fixed;
@@ -453,7 +586,7 @@ export default {
   z-index: 98;
   background-color: #ffffff;
   border-top: 1px solid #e5e7eb;
-  padding: 16px;
+  padding: 12px 16px 16px;
   box-sizing: border-box;
 }
 
@@ -496,6 +629,19 @@ export default {
   color: #9ca3af;
 }
 
+.InputArea:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* 生成中输入框样式 */
+.InputWrapper.generating {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+  box-shadow: none;
+  opacity: 0.75;
+}
+
 .InputActions {
   display: flex;
   align-items: center;
@@ -532,8 +678,16 @@ export default {
   transform: scale(0.95);
 }
 
-.SendButton:not(.active) {
+.SendButton:not(.active):not(.generating) {
   cursor: not-allowed;
+}
+
+/* 生成中按钮：始终蓝色，禁止点击 */
+.SendButton.generating {
+  background-color: #2563eb;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* 滚动条样式 */

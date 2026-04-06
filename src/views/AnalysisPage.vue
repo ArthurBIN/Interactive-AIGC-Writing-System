@@ -1,5 +1,4 @@
 <template>
-  <!-- 测试 -->
   <div class="AnalysisContainer">
     <van-overlay :show="loading" class="full-loading">
       <div class="loading-wrapper">
