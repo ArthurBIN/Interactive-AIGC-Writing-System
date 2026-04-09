@@ -13,6 +13,9 @@ import UserPage from "@/views/UserPage.vue";
 import UploadPage from "@/views/UploadPage.vue";
 import CompositionsPage from "@/views/CompositionsPage.vue";
 import AnalysisPage from "@/views/AnalysisPage.vue";
+import PhrasebookPage from "@/views/PhrasebookPage.vue";
+import CheckinPage from "@/views/CheckinPage.vue";
+import GoalPage from "@/views/GoalPage.vue";
 import {supabase} from "@/config/supabase";
 
 Vue.use(VueRouter)
@@ -86,6 +89,24 @@ const routes = [
         path: '/user',
         name: 'user',
         component: UserPage,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/phrasebook',
+        name: 'phrasebook',
+        component: PhrasebookPage,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/checkin',
+        name: 'checkin',
+        component: CheckinPage,
+        meta: {requiresAuth: true}
+    },
+    {
+        path: '/goals',
+        name: 'goals',
+        component: GoalPage,
         meta: {requiresAuth: true}
     },
 ]

@@ -148,6 +148,34 @@
         <van-skeleton title :row="3"/>
       </div>
 
+      <!-- 功能入口 -->
+      <div class="FeatureSection">
+        <div class="SectionTitle">学习工具</div>
+        <div class="FeatureGrid">
+          <div class="FeatureCard" @click="$router.push('/checkin')">
+            <div class="FeatureIconWrap checkin">
+              <i class="iconfont icon-rili"></i>
+            </div>
+            <div class="FeatureName">写作打卡</div>
+            <div class="FeatureDesc">坚持每日记录</div>
+          </div>
+          <div class="FeatureCard" @click="$router.push('/goals')">
+            <div class="FeatureIconWrap goal">
+              <i class="iconfont icon-mubiao"></i>
+            </div>
+            <div class="FeatureName">写作目标</div>
+            <div class="FeatureDesc">设定并追踪目标</div>
+          </div>
+          <div class="FeatureCard" @click="$router.push('/phrasebook')">
+            <div class="FeatureIconWrap phrase">
+              <i class="iconfont icon-list"></i>
+            </div>
+            <div class="FeatureName">词句收藏</div>
+            <div class="FeatureDesc">积累好词好句</div>
+          </div>
+        </div>
+      </div>
+
       <div class="ActionArea">
         <van-button
             block
@@ -591,4 +619,45 @@ export default {
   gap: 6px;
   border-left: 3px solid #ff976a;
 }
+
+/* 功能入口 */
+.FeatureSection {
+  margin-bottom: 24px;
+}
+
+.FeatureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.FeatureCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.FeatureCard:active { transform: scale(0.96); }
+
+.FeatureIconWrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.FeatureIconWrap.checkin { background: #fff5f0; color: #ff6b35; }
+.FeatureIconWrap.goal    { background: #f0f5ff; color: #2f54eb; }
+.FeatureIconWrap.phrase  { background: #f6ffed; color: #52c41a; }
+
+.FeatureName { font-size: 13px; font-weight: 600; color: #1a1a1a; }
+.FeatureDesc { font-size: 11px; color: #bbb; text-align: center; }
 </style>
