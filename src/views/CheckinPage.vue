@@ -2,10 +2,13 @@
   <div class="CheckinContainer">
     <!-- 顶部栏 -->
     <div class="TopBox">
-      <div class="BackBtn" @click="$router.back()">
-        <i class="iconfont icon-fanhui"></i>
+      <div class="TopRow">
+        <div class="BackBtn" @click="$router.back()">
+          <i class="iconfont icon-fanhui"></i>
+        </div>
+        <div class="TopTitle">写作打卡</div>
+        <div class="Placeholder"></div>
       </div>
-      <div class="TopTitle">写作打卡</div>
       <div class="MonthNav">
         <i class="iconfont icon-xiangzuojiantou NavArrow" @click="prevMonth"></i>
         <span class="MonthLabel">{{ currentYear }}年{{ currentMonth }}月</span>
@@ -126,7 +129,8 @@ export default {
   },
   computed: {
     todayStr() {
-      return new Date().toISOString().slice(0, 10)
+      const d = new Date()
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     },
     monthDays() {
       return this.checkedDates.size
@@ -267,20 +271,21 @@ export default {
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #eee;
   z-index: 100;
-  padding: 0 16px;
   box-sizing: border-box;
 }
 
+/* 第一行：返回 + 标题 + 占位 */
 .TopRow {
   height: 54px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 16px;
 }
 
 .BackBtn {
   width: 36px;
-  height: 54px;
+  height: 36px;
   display: flex;
   align-items: center;
   font-size: 20px;
@@ -291,18 +296,19 @@ export default {
   font-size: 16px;
   font-weight: 600;
   color: #111;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
+.Placeholder {
+  width: 36px;
+}
+
+/* 第二行：月份切换 */
 .MonthNav {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  height: 40px;
-  padding-bottom: 8px;
+  gap: 16px;
+  padding: 4px 0 12px;
 }
 
 .MonthLabel {
