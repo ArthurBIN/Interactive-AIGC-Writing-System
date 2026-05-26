@@ -8,7 +8,7 @@
       <!-- 用户身份卡 -->
       <div class="UserIdentityCard">
         <div class="AvatarWrapper">
-          <img src="../images/tx.png" alt="avatar">
+          <img src="../images/tx.png" alt="avatar" />
         </div>
         <div class="InfoDetail">
           <h2 class="UserNick">{{ userNickname }}</h2>
@@ -32,14 +32,20 @@
             <div class="StatLabel">次批改</div>
           </div>
           <div class="StatCard highlight">
-            <div class="StatNum" :style="{ color: getScoreColor(stats.avgScore) }">
-              {{ stats.avgScore || '-' }}
+            <div
+              class="StatNum"
+              :style="{ color: getScoreColor(stats.avgScore) }"
+            >
+              {{ stats.avgScore || "-" }}
             </div>
             <div class="StatLabel">平均分</div>
           </div>
           <div class="StatCard highlight">
-            <div class="StatNum" :style="{ color: getScoreColor(stats.bestScore) }">
-              {{ stats.bestScore || '-' }}
+            <div
+              class="StatNum"
+              :style="{ color: getScoreColor(stats.bestScore) }"
+            >
+              {{ stats.bestScore || "-" }}
             </div>
             <div class="StatLabel">最高分</div>
           </div>
@@ -49,57 +55,93 @@
         <div class="TrendCard" v-if="stats.recentScores.length >= 2">
           <div class="TrendHeader">
             <span class="TrendTitle">分数趋势</span>
-            <span class="TrendSub">近 {{ stats.recentScores.length }} 次批改</span>
+            <span class="TrendSub"
+              >近 {{ stats.recentScores.length }} 次批改</span
+            >
           </div>
           <div class="TrendChartWrap">
-            <svg width="100%" height="70" :viewBox="`0 0 ${trendWidth} 70`" preserveAspectRatio="none">
+            <svg
+              width="100%"
+              height="70"
+              :viewBox="`0 0 ${trendWidth} 70`"
+              preserveAspectRatio="none"
+            >
               <!-- 横向参考线 -->
-              <line x1="0" y1="15" :x2="trendWidth" y2="15" stroke="#f5f5f5" stroke-width="1"/>
-              <line x1="0" y1="38" :x2="trendWidth" y2="38" stroke="#f5f5f5" stroke-width="1"/>
-              <line x1="0" y1="61" :x2="trendWidth" y2="61" stroke="#f5f5f5" stroke-width="1"/>
+              <line
+                x1="0"
+                y1="15"
+                :x2="trendWidth"
+                y2="15"
+                stroke="#f5f5f5"
+                stroke-width="1"
+              />
+              <line
+                x1="0"
+                y1="38"
+                :x2="trendWidth"
+                y2="38"
+                stroke="#f5f5f5"
+                stroke-width="1"
+              />
+              <line
+                x1="0"
+                y1="61"
+                :x2="trendWidth"
+                y2="61"
+                stroke="#f5f5f5"
+                stroke-width="1"
+              />
               <!-- 渐变填充 -->
               <defs>
                 <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#1989fa" stop-opacity="0.3"/>
-                  <stop offset="100%" stop-color="#1989fa" stop-opacity="0.02"/>
+                  <stop offset="0%" stop-color="#1989fa" stop-opacity="0.3" />
+                  <stop
+                    offset="100%"
+                    stop-color="#1989fa"
+                    stop-opacity="0.02"
+                  />
                 </linearGradient>
               </defs>
-              <polygon :points="trendFillPoints" fill="url(#trendGrad)"/>
+              <polygon :points="trendFillPoints" fill="url(#trendGrad)" />
               <!-- 折线 -->
               <polyline
-                  :points="trendLinePoints"
-                  fill="none"
-                  stroke="#1989fa"
-                  stroke-width="2"
-                  stroke-linejoin="round"
-                  stroke-linecap="round"
+                :points="trendLinePoints"
+                fill="none"
+                stroke="#1989fa"
+                stroke-width="2"
+                stroke-linejoin="round"
+                stroke-linecap="round"
               />
               <!-- 数据点 -->
               <circle
-                  v-for="(pt, i) in trendPoints"
-                  :key="i"
-                  :cx="pt.x"
-                  :cy="pt.y"
-                  r="3.5"
-                  fill="#1989fa"
-                  stroke="#fff"
-                  stroke-width="1.5"
+                v-for="(pt, i) in trendPoints"
+                :key="i"
+                :cx="pt.x"
+                :cy="pt.y"
+                r="3.5"
+                fill="#1989fa"
+                stroke="#fff"
+                stroke-width="1.5"
               />
               <!-- 分数标签（仅首尾） -->
               <text
-                  :x="trendPoints[0].x"
-                  :y="trendPoints[0].y - 8"
-                  text-anchor="middle"
-                  font-size="10"
-                  fill="#1989fa"
-              >{{ stats.recentScores[0] }}</text>
+                :x="trendPoints[0].x"
+                :y="trendPoints[0].y - 8"
+                text-anchor="middle"
+                font-size="10"
+                fill="#1989fa"
+              >
+                {{ stats.recentScores[0] }}
+              </text>
               <text
-                  :x="trendPoints[trendPoints.length - 1].x"
-                  :y="trendPoints[trendPoints.length - 1].y - 8"
-                  text-anchor="middle"
-                  font-size="10"
-                  fill="#1989fa"
-              >{{ stats.recentScores[stats.recentScores.length - 1] }}</text>
+                :x="trendPoints[trendPoints.length - 1].x"
+                :y="trendPoints[trendPoints.length - 1].y - 8"
+                text-anchor="middle"
+                font-size="10"
+                fill="#1989fa"
+              >
+                {{ stats.recentScores[stats.recentScores.length - 1] }}
+              </text>
             </svg>
             <div class="TrendRange">
               <span>{{ stats.minScore }}</span>
@@ -112,12 +154,21 @@
         <div class="DiagCard" v-if="stats.totalAnnotations > 0">
           <div class="TrendHeader">
             <span class="TrendTitle">写作诊断报告</span>
-            <span class="TrendSub">基于 {{ stats.totalAnnotations }} 条批注</span>
+            <span class="TrendSub"
+              >基于 {{ stats.totalAnnotations }} 条批注</span
+            >
           </div>
           <div class="DiagList">
-            <div class="DiagItem" v-for="item in weaknessItems" :key="item.type">
+            <div
+              class="DiagItem"
+              v-for="item in weaknessItems"
+              :key="item.type"
+            >
               <div class="DiagItemHeader">
-                <span class="DiagTag" :style="{ background: item.bg, color: item.color }">
+                <span
+                  class="DiagTag"
+                  :style="{ background: item.bg, color: item.color }"
+                >
                   {{ item.label }}
                 </span>
                 <span class="DiagCount">{{ item.count }} 处</span>
@@ -125,14 +176,17 @@
               </div>
               <div class="DiagBar">
                 <div
-                    class="DiagBarFill"
-                    :style="{ width: getAnnotationPct(item.count) + '%', background: item.color }"
+                  class="DiagBarFill"
+                  :style="{
+                    width: getAnnotationPct(item.count) + '%',
+                    background: item.color,
+                  }"
                 ></div>
               </div>
             </div>
           </div>
           <div class="DiagTip" v-if="weaknessTip">
-            <van-icon name="bulb-o" color="#ff976a"/>
+            <van-icon name="bulb-o" color="#ff976a" />
             {{ weaknessTip }}
           </div>
         </div>
@@ -145,7 +199,7 @@
 
       <!-- 加载中骨架 -->
       <div class="StatsSkeleton" v-else>
-        <van-skeleton title :row="3"/>
+        <van-skeleton title :row="3" />
       </div>
 
       <!-- 功能入口 -->
@@ -154,14 +208,14 @@
         <div class="FeatureGrid">
           <div class="FeatureCard" @click="$router.push('/checkin')">
             <div class="FeatureIconWrap checkin">
-              <i class="iconfont icon-rili"></i>
+              <i class="iconfont icon-jilu"></i>
             </div>
             <div class="FeatureName">写作打卡</div>
             <div class="FeatureDesc">坚持每日记录</div>
           </div>
           <div class="FeatureCard" @click="$router.push('/goals')">
             <div class="FeatureIconWrap goal">
-              <i class="iconfont icon-mubiao"></i>
+              <i class="iconfont icon-jilu1"></i>
             </div>
             <div class="FeatureName">写作目标</div>
             <div class="FeatureDesc">设定并追踪目标</div>
@@ -178,11 +232,11 @@
 
       <div class="ActionArea">
         <van-button
-            block
-            plain
-            type="danger"
-            class="LogoutVantBtn"
-            @click="handleLogout"
+          block
+          plain
+          type="danger"
+          class="LogoutVantBtn"
+          @click="handleLogout"
         >
           退出当前账号
         </van-button>
@@ -192,9 +246,9 @@
 </template>
 
 <script>
-import {supabase} from "@/config/supabase";
-import {logoutUser} from "@/api/auth";
-import {Dialog, Toast} from "vant";
+import { supabase } from "@/config/supabase";
+import { logoutUser } from "@/api/auth";
+import { Dialog, Toast } from "vant";
 
 const TREND_WIDTH = 280;
 
@@ -211,20 +265,31 @@ export default {
         bestScore: 0,
         minScore: 0,
         recentScores: [],
-        annotationTypes: {error: 0, suggestion: 0, structure: 0, highlight: 0},
-        totalAnnotations: 0
+        annotationTypes: {
+          error: 0,
+          suggestion: 0,
+          structure: 0,
+          highlight: 0,
+        },
+        totalAnnotations: 0,
       },
-      trendWidth: TREND_WIDTH
-    }
+      trendWidth: TREND_WIDTH,
+    };
   },
   computed: {
     userNickname() {
-      if (!this.session) return '';
-      const {user} = this.session;
-      return user.user_metadata?.nick_name || user.email?.split('@')[0] || '智慧创作者';
+      if (!this.session) return "";
+      const { user } = this.session;
+      return (
+        user.user_metadata?.nick_name ||
+        user.email?.split("@")[0] ||
+        "智慧创作者"
+      );
     },
     userIdShort() {
-      return this.session?.user?.id?.substring(0, 8).toUpperCase() || '--------';
+      return (
+        this.session?.user?.id?.substring(0, 8).toUpperCase() || "--------"
+      );
     },
     trendPoints() {
       const scores = this.stats.recentScores;
@@ -237,15 +302,15 @@ export default {
       const range = maxS - minS || 10;
       return scores.map((s, i) => ({
         x: padX + (i / (n - 1)) * chartW,
-        y: 62 - ((s - minS) / range) * 50
+        y: 62 - ((s - minS) / range) * 50,
       }));
     },
     trendLinePoints() {
-      return this.trendPoints.map(p => `${p.x},${p.y}`).join(' ');
+      return this.trendPoints.map((p) => `${p.x},${p.y}`).join(" ");
     },
     trendFillPoints() {
-      if (this.trendPoints.length < 2) return '';
-      const pts = this.trendPoints.map(p => `${p.x},${p.y}`).join(' ');
+      if (this.trendPoints.length < 2) return "";
+      const pts = this.trendPoints.map((p) => `${p.x},${p.y}`).join(" ");
       const last = this.trendPoints[this.trendPoints.length - 1];
       const first = this.trendPoints[0];
       return `${pts} ${last.x},70 ${first.x},70`;
@@ -253,26 +318,54 @@ export default {
     weaknessItems() {
       const t = this.stats.annotationTypes || {};
       const items = [
-        {type: 'error', label: '语言准确性', count: t.error || 0, color: '#ff4d4f', bg: '#fff0f0'},
-        {type: 'suggestion', label: '内容充实度', count: t.suggestion || 0, color: '#1890ff', bg: '#e6f7ff'},
-        {type: 'structure', label: '篇章结构', count: t.structure || 0, color: '#722ed1', bg: '#f9f0ff'},
-        {type: 'highlight', label: '写作亮点', count: t.highlight || 0, color: '#faad14', bg: '#fffbe6'},
+        {
+          type: "error",
+          label: "语言准确性",
+          count: t.error || 0,
+          color: "#ff4d4f",
+          bg: "#fff0f0",
+        },
+        {
+          type: "suggestion",
+          label: "内容充实度",
+          count: t.suggestion || 0,
+          color: "#1890ff",
+          bg: "#e6f7ff",
+        },
+        {
+          type: "structure",
+          label: "篇章结构",
+          count: t.structure || 0,
+          color: "#722ed1",
+          bg: "#f9f0ff",
+        },
+        {
+          type: "highlight",
+          label: "写作亮点",
+          count: t.highlight || 0,
+          color: "#faad14",
+          bg: "#fffbe6",
+        },
       ];
       return items.sort((a, b) => b.count - a.count);
     },
     weaknessTip() {
-      const problems = this.weaknessItems.filter(i => i.type !== 'highlight' && i.count > 0);
-      if (!problems.length) return '';
+      const problems = this.weaknessItems.filter(
+        (i) => i.type !== "highlight" && i.count > 0,
+      );
+      if (!problems.length) return "";
       const tips = {
-        error: '注意错别字和语法规范，写作前多检查用词是否准确',
-        suggestion: '文章内容还需充实，多添加具体事例和细节描写',
-        structure: '重点提升段落过渡和文章布局，注意逻辑层次',
+        error: "注意错别字和语法规范，写作前多检查用词是否准确",
+        suggestion: "文章内容还需充实，多添加具体事例和细节描写",
+        structure: "重点提升段落过渡和文章布局，注意逻辑层次",
       };
-      return tips[problems[0].type] || '';
-    }
+      return tips[problems[0].type] || "";
+    },
   },
   async mounted() {
-    const {data: {session}} = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     this.session = session;
     if (session) await this.loadStats(session.user.id);
     else this.statsLoading = false;
@@ -282,46 +375,52 @@ export default {
       this.statsLoading = true;
       try {
         // 作文数量
-        const {count: essayCount} = await supabase
-            .from('essays')
-            .select('id', {count: 'exact', head: true})
-            .eq('user_id', userId);
+        const { count: essayCount } = await supabase
+          .from("essays")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", userId);
 
         // 批改记录（按当前用户过滤）
-        const {data: compositions} = await supabase
-            .from('compositions')
-            .select('result, created_at')
-            .eq('user_id', userId)
-            .order('created_at', {ascending: true});
+        const { data: compositions } = await supabase
+          .from("compositions")
+          .select("result, created_at")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: true });
 
         const scores = (compositions || [])
-            .map(c => c.result?.score)
-            .filter(s => typeof s === 'number' && s > 0);
+          .map((c) => c.result?.score)
+          .filter((s) => typeof s === "number" && s > 0);
 
         const recentScores = scores.slice(-8);
 
         // 批注类型分布
-        const allAnnotations = (compositions || [])
-            .flatMap(c => c.result?.annotations || []);
+        const allAnnotations = (compositions || []).flatMap(
+          (c) => c.result?.annotations || [],
+        );
         const typeCount = {
-          error: allAnnotations.filter(a => a.type === 'error').length,
-          suggestion: allAnnotations.filter(a => a.type === 'suggestion').length,
-          structure: allAnnotations.filter(a => a.type === 'structure').length,
-          highlight: allAnnotations.filter(a => a.type === 'highlight').length,
+          error: allAnnotations.filter((a) => a.type === "error").length,
+          suggestion: allAnnotations.filter((a) => a.type === "suggestion")
+            .length,
+          structure: allAnnotations.filter((a) => a.type === "structure")
+            .length,
+          highlight: allAnnotations.filter((a) => a.type === "highlight")
+            .length,
         };
 
         this.stats = {
           essayCount: essayCount || 0,
           analysisCount: scores.length,
-          avgScore: scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
+          avgScore: scores.length
+            ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+            : 0,
           bestScore: scores.length ? Math.max(...scores) : 0,
           minScore: scores.length ? Math.min(...scores) : 0,
           recentScores,
           annotationTypes: typeCount,
-          totalAnnotations: Object.values(typeCount).reduce((a, b) => a + b, 0)
+          totalAnnotations: Object.values(typeCount).reduce((a, b) => a + b, 0),
         };
       } catch (e) {
-        console.error('加载统计失败', e);
+        console.error("加载统计失败", e);
       } finally {
         this.statsLoading = false;
       }
@@ -329,37 +428,38 @@ export default {
 
     getAnnotationPct(count) {
       if (!this.stats.totalAnnotations) return 0;
-      return Math.round(count / this.stats.totalAnnotations * 100);
+      return Math.round((count / this.stats.totalAnnotations) * 100);
     },
 
     getScoreColor(score) {
-      if (!score) return '#999';
-      if (score >= 90) return '#07c160';
-      if (score >= 75) return '#1989fa';
-      if (score >= 60) return '#ff976a';
-      return '#ee0a24';
+      if (!score) return "#999";
+      if (score >= 90) return "#07c160";
+      if (score >= 75) return "#1989fa";
+      if (score >= 60) return "#ff976a";
+      return "#ee0a24";
     },
 
     async handleLogout() {
       Dialog.confirm({
-        title: '提示',
-        message: '确定要退出当前登录账号吗？',
-        confirmButtonColor: '#000',
-        cancelButtonColor: '#969799',
-      }).then(async () => {
-        const {error} = await logoutUser();
-        if (error) {
-          Toast.fail("登出操作失败");
-        } else {
-          this.session = null;
-          this.$router.replace("/login");
-          Toast.success("已安全退出");
-        }
-      }).catch(() => {
-      });
-    }
-  }
-}
+        title: "提示",
+        message: "确定要退出当前登录账号吗？",
+        confirmButtonColor: "#000",
+        cancelButtonColor: "#969799",
+      })
+        .then(async () => {
+          const { error } = await logoutUser();
+          if (error) {
+            Toast.fail("登出操作失败");
+          } else {
+            this.session = null;
+            this.$router.replace("/login");
+            Toast.success("已安全退出");
+          }
+        })
+        .catch(() => {});
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -437,7 +537,6 @@ export default {
   border-radius: 4px;
   font-family: monospace;
 }
-
 
 .LogoutVantBtn {
   height: 48px;
@@ -639,11 +738,13 @@ export default {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: transform 0.15s;
 }
-.FeatureCard:active { transform: scale(0.96); }
+.FeatureCard:active {
+  transform: scale(0.96);
+}
 
 .FeatureIconWrap {
   width: 44px;
@@ -654,10 +755,27 @@ export default {
   justify-content: center;
   font-size: 22px;
 }
-.FeatureIconWrap.checkin { background: #fff5f0; color: #ff6b35; }
-.FeatureIconWrap.goal    { background: #f0f5ff; color: #2f54eb; }
-.FeatureIconWrap.phrase  { background: #f6ffed; color: #52c41a; }
+.FeatureIconWrap.checkin {
+  background: #fff5f0;
+  color: #ff6b35;
+}
+.FeatureIconWrap.goal {
+  background: #f0f5ff;
+  color: #2f54eb;
+}
+.FeatureIconWrap.phrase {
+  background: #f6ffed;
+  color: #52c41a;
+}
 
-.FeatureName { font-size: 13px; font-weight: 600; color: #1a1a1a; }
-.FeatureDesc { font-size: 11px; color: #bbb; text-align: center; }
+.FeatureName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.FeatureDesc {
+  font-size: 11px;
+  color: #bbb;
+  text-align: center;
+}
 </style>

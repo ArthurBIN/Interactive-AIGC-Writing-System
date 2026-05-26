@@ -3,12 +3,16 @@
     <!-- 顶部栏 -->
     <div class="TopBox">
       <GoBack class="GoBackBtn"></GoBack>
-      <div class="TopTitle">{{ style || '新对话' }}</div>
+      <div class="TopTitle">{{ style || "新对话" }}</div>
 
       <!-- 右上角跳转按钮 -->
       <div class="TopRightIcon" @click="goEditPage()">
         <div class="IconBreath" v-if="contentTotal > 300"></div>
-        <div class="BreathTip" @click.stop="showBreathTip = false" v-if="contentTotal > 300 && showBreathTip">
+        <div
+          class="BreathTip"
+          @click.stop="showBreathTip = false"
+          v-if="contentTotal > 300 && showBreathTip"
+        >
           试试生成故事吧~
         </div>
         <i class="iconfont icon-xiangyoujiantou"></i>
@@ -19,8 +23,11 @@
     <div class="ChatContainer">
       <!-- 消息列表 -->
       <div class="MessageBox" ref="scrollArea">
-        <div class="MessageItem" v-for="(item, index) in messageList" :key="index">
-
+        <div
+          class="MessageItem"
+          v-for="(item, index) in messageList"
+          :key="index"
+        >
           <!-- 用户消息 -->
           <div v-if="item.role === 'user'" class="UserMessage">
             <div class="UserBubble">{{ item.content }}</div>
@@ -34,8 +41,12 @@
 
             <!-- 等待状态：三点跳动（内容为空时显示） -->
             <div
-                class="TypingBubble"
-                v-if="!item.content && isGenerating && index === messageList.length - 1"
+              class="TypingBubble"
+              v-if="
+                !item.content &&
+                isGenerating &&
+                index === messageList.length - 1
+              "
             >
               <span class="TypingDot"></span>
               <span class="TypingDot"></span>
@@ -46,8 +57,12 @@
             <div class="AssistantContent" v-else>
               <span v-html="render(item.content)"></span>
               <span
-                  class="StreamCursor"
-                  v-if="isGenerating && index === messageList.length - 1 && item.content"
+                class="StreamCursor"
+                v-if="
+                  isGenerating &&
+                  index === messageList.length - 1 &&
+                  item.content
+                "
               ></span>
             </div>
           </div>
@@ -66,25 +81,25 @@
 
         <div class="InputWrapper" :class="{ generating: isGenerating }">
           <textarea
-              v-model="inputText"
-              ref="autoResizeTextarea"
-              class="InputArea"
-              :placeholder="isGenerating ? '等待 AI 回复...' : '发送消息...'"
-              :disabled="isGenerating"
-              rows="1"
-              @keydown="handleKeydown"
+            v-model="inputText"
+            ref="autoResizeTextarea"
+            class="InputArea"
+            :placeholder="isGenerating ? '等待 AI 回复...' : '发送消息...'"
+            :disabled="isGenerating"
+            rows="1"
+            @keydown="handleKeydown"
           ></textarea>
 
           <div class="InputActions">
             <div
-                class="SendButton"
-                :class="{
-                  active: inputText.trim() && !isGenerating,
-                  generating: isGenerating
-                }"
-                @click="sendMessage"
+              class="SendButton"
+              :class="{
+                active: inputText.trim() && !isGenerating,
+                generating: isGenerating,
+              }"
+              @click="sendMessage"
             >
-              <van-loading v-if="isGenerating" size="16px" color="#fff"/>
+              <van-loading v-if="isGenerating" size="16px" color="#fff" />
               <i v-else class="iconfont icon-xiangshang"></i>
             </div>
           </div>
@@ -95,25 +110,25 @@
 </template>
 
 <script>
-import {Toast} from "vant";
-import {createChat, getChatDetail, updateChatMessages} from "@/api/chat";
-import {supabase} from "@/config/supabase";
-import {marked} from 'marked';
+import { Toast } from "vant";
+import { createChat, getChatDetail, updateChatMessages } from "@/api/chat";
+import { supabase } from "@/config/supabase";
+import { marked } from "marked";
 
 export default {
-  name: 'ChatPage',
+  name: "ChatPage",
   data() {
     return {
       userId: "",
-      dbChatId: null,     // 数据库记录ID
-      style: "",          // 主题
-      messageList: [],    // 对话数组
+      dbChatId: null, // 数据库记录ID
+      style: "", // 主题
+      messageList: [], // 对话数组
       inputText: "",
       contentTotal: 0,
       showBreathTip: true,
       isGenerating: false,
-      isFirstMessage: true
-    }
+      isFirstMessage: true,
+    };
   },
 
   watch: {
@@ -124,11 +139,14 @@ export default {
     },
     messageList: {
       handler(newList) {
-        this.contentTotal = newList.reduce((t, i) => i.role === "user" ? t + (i.content?.length || 0) : t, 0);
+        this.contentTotal = newList.reduce(
+          (t, i) => (i.role === "user" ? t + (i.content?.length || 0) : t),
+          0,
+        );
         this.scrollToBottom();
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
 
   async mounted() {
@@ -140,12 +158,14 @@ export default {
       return marked.parse(text);
     },
     async initPage() {
-      const {data: {session}} = await supabase.auth.getSession();
-      if (!session) return this.$router.push('/login');
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return this.$router.push("/login");
       this.userId = session.user.id;
 
       const existingId = this.$route.query.chat_id;
-      this.style = this.$route.query.style || '新对话';
+      this.style = this.$route.query.style || "新对话";
 
       try {
         if (existingId) {
@@ -156,10 +176,12 @@ export default {
           this.isFirstMessage = false;
         } else {
           // 新对话：仅内存展示欢迎语，不操作数据库
-          this.messageList = [{
-            role: "assistant",
-            content: `你好！我是你的作文助手。关于“${this.style}”，你现在有什么想法吗？`
-          }];
+          this.messageList = [
+            {
+              role: "assistant",
+              content: `你好！我是你的作文助手。关于“${this.style}”，你现在有什么想法吗？`,
+            },
+          ];
           this.isFirstMessage = true;
         }
       } catch (e) {
@@ -171,14 +193,18 @@ export default {
       const message = this.inputText.trim();
       if (!message || this.isGenerating) return;
 
-      this.messageList.push({role: "user", content: message});
+      this.messageList.push({ role: "user", content: message });
       this.inputText = "";
       this.isGenerating = true;
 
       try {
         // 延迟创建：只有用户发了第一条消息，才在数据库建表
         if (this.isFirstMessage && !this.dbChatId) {
-          const chatRecord = await createChat(this.userId, this.style, this.messageList);
+          const chatRecord = await createChat(
+            this.userId,
+            this.style,
+            this.messageList,
+          );
           this.dbChatId = chatRecord.id;
           this.isFirstMessage = false;
         } else {
@@ -196,21 +222,51 @@ export default {
       const apiKey = process.env.VUE_APP_MOONSHOT_API_KEY;
       const systemPrompt = {
         role: "system",
-        content: `你是一个中学生作文导师。当前主题：${this.style}。请引导学生思考，不要代写全篇。`
+        content: `# 角色
+                  你是一位经验丰富、亲和力强的中学语文老师，专门辅导学生写作文。你的教学风格是循循善诱、鼓励为主。
+                        
+                  # 当前写作主题
+                  ${this.style}
+                        
+                  # 核心原则
+                  - **绝对不要代写**：不要替学生写出完整段落或全篇作文，哪怕学生要求你写
+                  - **引导思考**：通过提问帮学生打开思路，比如"你能回忆一个具体的场景吗？""当时你心里是什么感受？"
+                  - **少量示范**：可以给出一两句话作为示例启发，但要明确标注"比如可以这样开头"，让学生自己展开
+                  - **具体可操作**：建议要具体，不说"写得更生动"，而是说"试试把'我很开心'换成当时你做了什么动作、说了什么话"
+                        
+                  # 教学流程
+                  1. **审题阶段**：先帮学生理解题目要求，确认体裁（记叙文/议论文/说明文等）
+                  2. **选材阶段**：通过提问引导学生从自身经历中找素材，问具体的人、事、场景
+                  3. **构思阶段**：帮学生梳理文章结构，开头怎么引入、中间怎么展开、结尾怎么收束
+                  4. **表达阶段**：针对学生写出的句子，给出修改方向和修辞建议
+                  5. **修改阶段**：引导学生自查，比如"读一遍看看有没有口水话""这段和主题的关系是什么"
+                        
+                  # 互动要求
+                  - 每次回复控制在 150 字以内，避免长篇大论让学生失去耐心
+                  - 每次最多提 1-2 个问题，不要一口气抛出太多
+                  - 用口语化、轻松的语气，可以适当用 emoji，像朋友聊天一样
+                  - 如果学生跑题或卡住了，温和地拉回来，不要批评
+                  - 适时给予真诚的肯定，指出学生写得好的具体地方`,
       };
 
       try {
-        const response = await fetch("https://api.moonshot.cn/v1/chat/completions", {
-          method: "POST",
-          headers: {"Content-Type": "application/json", "Authorization": `Bearer ${apiKey}`},
-          body: JSON.stringify({
-            model: "moonshot-v1-8k",
-            messages: [systemPrompt, ...this.messageList],
-            stream: true
-          })
-        });
+        const response = await fetch(
+          "https://api.moonshot.cn/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({
+              model: "moonshot-v1-8k",
+              messages: [systemPrompt, ...this.messageList],
+              stream: true,
+            }),
+          },
+        );
 
-        const assistantMessage = {role: "assistant", content: ""};
+        const assistantMessage = { role: "assistant", content: "" };
         this.messageList.push(assistantMessage);
 
         const reader = response.body.getReader();
@@ -218,7 +274,7 @@ export default {
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
-          const {done, value} = await reader.read();
+          const { done, value } = await reader.read();
           if (done) break;
 
           const chunk = decoder.decode(value);
@@ -232,8 +288,7 @@ export default {
                 const delta = data.choices[0].delta.content;
                 if (delta) assistantMessage.content += delta;
                 // eslint-disable-next-line no-empty
-              } catch (e) {
-              }
+              } catch (e) {}
             }
           }
           this.scrollToBottom();
@@ -247,10 +302,9 @@ export default {
       }
     },
 
-
     handleKeydown(e) {
       // Enter 发送，Shift+Enter 换行
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         this.sendMessage();
       }
@@ -259,8 +313,8 @@ export default {
     adjustTextareaHeight() {
       const textarea = this.$refs.autoResizeTextarea;
       if (textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
+        textarea.style.height = "auto";
+        textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
       }
     },
 
@@ -271,8 +325,8 @@ export default {
         this.$router.replace({
           path: "/edit",
           query: {
-            chat_id: this.dbChatId
-          }
+            chat_id: this.dbChatId,
+          },
         });
       }
     },
@@ -284,13 +338,13 @@ export default {
           scrollArea.scrollTop = scrollArea.scrollHeight;
         }
       });
-    }
+    },
   },
 
   beforeDestroy() {
     Toast.clear();
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
@@ -514,7 +568,9 @@ export default {
 }
 
 @keyframes typingBounce {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     transform: translateY(0);
     opacity: 0.35;
   }
@@ -537,8 +593,13 @@ export default {
 }
 
 @keyframes cursorBlink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* 生成中状态条 */
@@ -562,13 +623,22 @@ export default {
 }
 
 @keyframes statusPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
 }
 
 .status-fade-enter-active,
 .status-fade-leave-active {
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
 }
 
 .status-fade-enter,
@@ -622,7 +692,9 @@ export default {
   line-height: 1.5;
   outline: none;
   color: #111827;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
 }
 
 .InputArea::placeholder {
